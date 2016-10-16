@@ -10,6 +10,7 @@ namespace TeaboxDataFormat.IO
     {
         public TeaboxDataRow() : base()
         {
+            _type = TeaboxDataLineType.Data;
         }
 
         new public string this[int index]
