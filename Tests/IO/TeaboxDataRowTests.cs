@@ -36,5 +36,12 @@ namespace TeaboxDataFormat.Tests.IO
 
             Assert.That(TeaboxDataLine.GetData(row, "Test"), Is.EqualTo("Hello World"));
         }
+
+        [Test]
+        public void RowIsSetAsData()
+        {
+            var row = new TeaboxDataRow();
+            Assert.That(TeaboxDataLine.GetLineType(row), Is.EqualTo(TeaboxDataLineType.Data));
+        }
     }
 }

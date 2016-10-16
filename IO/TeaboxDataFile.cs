@@ -25,7 +25,7 @@ namespace TeaboxDataFormat.IO
         {
             return new TeaboxDataFile(file);
         }
-        //------
+
         public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, string file_path)
         {
             return DataTableToFile(data_table, new FileContainer(file_path, true));
@@ -35,10 +35,18 @@ namespace TeaboxDataFormat.IO
         {
             var new_file = Open(file);
 
-            if(data_table.Count > 0)
-            {
-                new_file._titles = TeaboxDataLine.GetTitles(data_table.First()).ToArray();
+            new_file._titles = data_table.Titles;
 
+            if(new_file._titles.Length > 0)
+            {
+                var title_line = new TeaboxDataLine();
+                TeaboxDataLine.SetLineType(title_line, TeaboxDataLineType.Titles);
+                TeaboxDataLine.SetData(title_line, new_file._titles);
+                new_file._lines.Add(title_line);
+            }
+
+            if (data_table.Count > 0)
+            {
                 foreach (var row in data_table)
                 {
                     new_file._lines.Add(row);
@@ -47,7 +55,7 @@ namespace TeaboxDataFormat.IO
             
             return new_file;
         }
-        //------
+
         public TeaboxDataTable GetData()
         {
             var result = new TeaboxDataTable(_titles);

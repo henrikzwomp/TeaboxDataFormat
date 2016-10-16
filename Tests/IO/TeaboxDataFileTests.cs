@@ -463,14 +463,46 @@ namespace TeaboxDataFormat.Tests.IO
             }
         }
 
+        [Test]
+        public void CanTurnDataTableToFile()
+        {
+            IList<string> result = new List<string>();
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback((IList<string> y) => result = y);
+
+            var data_table = new TeaboxDataTable("Brick", "Color", "Amount");
+
+            var brick_3001 = new TeaboxDataRow();
+            brick_3001["Brick"] = "3001";
+            brick_3001["Color"] = "Red";
+            brick_3001["Amount"] = "18";
+
+            var brick_3003 = new TeaboxDataRow();
+            TeaboxDataLine.SetData(brick_3003, "Brick", "3004");
+            TeaboxDataLine.SetData(brick_3003, "Color", "Blue");
+            TeaboxDataLine.SetData(brick_3003, "Amount", "22");
+
+            TeaboxDataLine.SetComment(brick_3003, "Data line #2");
+
+            data_table.Add(brick_3001);
+            data_table.Add(brick_3003);
+
+            var data_file = TeaboxDataFile.DataTableToFile(data_table, file.Object);
+            data_file.Save();
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0], Is.EqualTo("!Brick\tColor\tAmount"));
+            Assert.That(result[1], Is.EqualTo("3001\tRed\t18"));
+            Assert.That(result[2], Is.EqualTo("3004\tBlue\t22 //Data line #2"));
+
+        }
+
         // ToDo: White space not preserved test
         // Comment in title perserved
         // Can save new object with values in correct columns
         // Write line with more data than titles???
         // Write file that missing titles
-
-
-
 
     }
 }

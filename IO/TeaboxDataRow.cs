@@ -8,7 +8,9 @@ namespace TeaboxDataFormat.IO
 {
     public class TeaboxDataRow : TeaboxDataLine
     {
-        public TeaboxDataRow() : base() { }
+        public TeaboxDataRow() : base()
+        {
+        }
 
         new public string this[int index]
         {
