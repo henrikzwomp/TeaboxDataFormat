@@ -24,7 +24,7 @@ namespace TeaboxDataFormat.IO
                 line = line.Substring(0, line.IndexOf(CommentIdentifier));
             }
 
-            line = line.Trim();
+            line = line.TrimEnd();
 
             if (line.StartsWith(TitleRowIdentifier))
             {

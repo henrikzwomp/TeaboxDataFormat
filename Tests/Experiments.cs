@@ -16,10 +16,8 @@ namespace Tests
     [TestFixture]
     public class Experiments
     {
-        
+
     }
-
-
 }
 
 

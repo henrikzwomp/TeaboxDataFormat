@@ -147,5 +147,37 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(data[2], Is.EqualTo("Data3"));
             Assert.That(comment, Is.EqualTo(" World"));
         }
+
+        [Test]
+        public void WillNotTrimAwayEmptyColumn()
+        {
+            string comment;
+            TeaboxDataLineType type;
+            string[] data;
+
+            TestReader.PublicParseLine("\tData2\tData3   ", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(3));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data[0], Is.EqualTo(""));
+            Assert.That(data[1], Is.EqualTo("Data2"));
+            Assert.That(data[2], Is.EqualTo("Data3"));
+
+            TestReader.PublicParseLine("\tData2\tData3\t", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(3));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data[0], Is.EqualTo(""));
+            Assert.That(data[1], Is.EqualTo("Data2"));
+            Assert.That(data[2], Is.EqualTo("Data3"));
+
+            TestReader.PublicParseLine("\t  Data2\tData3   ", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(3));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data[0], Is.EqualTo(""));
+            Assert.That(data[1], Is.EqualTo("Data2"));
+            Assert.That(data[2], Is.EqualTo("Data3"));
+        }
     }
 }
