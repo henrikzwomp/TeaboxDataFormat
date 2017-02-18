@@ -10,8 +10,8 @@
     <projectUrl>https://github.com/henrikzwomp/TeaboxDataFormat</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>First public release.</releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <releaseNotes>Experimental build</releaseNotes>
+    <copyright>Copyright 2017</copyright>
     <tags></tags>
   </metadata>
 </package>
