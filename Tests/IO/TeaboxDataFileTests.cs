@@ -498,11 +498,74 @@ namespace TeaboxDataFormat.Tests.IO
 
         }
 
+        [Test]
+        public void CanHandleNoTitlesWritingFileWithoutReadingItFirst()
+        {
+            IList<string> result = new List<string>();
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => result = y);
+
+            var lines = new List<TeaboxDataRow>()
+            {
+                new TeaboxDataRow() { [0] = "Hello", [1] = "World" },
+                new TeaboxDataRow() { [0] = "Some", [1] = "Thing" },
+                new TeaboxDataRow() { [0] = "Strange", [1] = "Way" }
+            };
+
+            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataRow>();
+            writer.Write(lines, file.Object);
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0], Is.EqualTo("Hello\tWorld"));
+            Assert.That(result[1], Is.EqualTo("Some\tThing"));
+            Assert.That(result[2], Is.EqualTo("Strange\tWay"));
+        }
+
+        [Test]
+        public void CanHandleNoTitlesWritingFileReadingItFirst()
+        {
+            IList<string> result = new List<string>();
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>() { "Hello\tWorld" });
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => result = y);
+
+            var lines = new List<TeaboxDataRow>()
+            {
+                new TeaboxDataRow() { [0] = "Hello", [1] = "World" },
+                new TeaboxDataRow() { [0] = "Some", [1] = "Thing" },
+                new TeaboxDataRow() { [0] = "Strange", [1] = "Way" }
+            };
+
+            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataRow>();
+            writer.Read(file.Object);
+            writer.Write(lines, file.Object);
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0], Is.EqualTo("Hello\tWorld"));
+            Assert.That(result[1], Is.EqualTo("Some\tThing"));
+            Assert.That(result[2], Is.EqualTo("Strange\tWay"));
+        }
+        
+        public class CanHandleNoTitlesWritingFile_GenericFileWriter<output_type> : TeaboxDataFileBase<output_type> where output_type : TeaboxDataLine, new()
+        {
+            public void Read(IFileContainer file)
+            {
+                ReadFile(file);
+            }
+
+            public void Write(IEnumerable<output_type> items, IFileContainer file)
+            {
+                _lines = new List<output_type>(items);
+                WriteFile(file);
+            }
+        }
+
         // ToDo: White space not preserved test
         // Comment in title perserved
         // Can save new object with values in correct columns
         // Write line with more data than titles???
-        // Write file that missing titles
 
     }
 }

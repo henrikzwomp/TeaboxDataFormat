@@ -8,7 +8,7 @@ namespace TeaboxDataFormat.IO
 {
     public abstract class TeaboxDataFileBase<item_type> : TeaboxDataFileReader where item_type : TeaboxDataLine, new()
     {
-        protected IList<item_type> _lines;
+        protected IList<item_type> _lines; // ToDo: Change to IEnumerable ?
         protected string[] _titles;
 
         protected void ReadFile(IFileContainer file)
@@ -45,6 +45,9 @@ namespace TeaboxDataFormat.IO
 
         protected void WriteFile(IFileContainer file)
         {
+            //if (_titles == null)
+            //    _titles = new string[0]; // If set in constructor. Don't overwrite it here.
+
             var raw_lines = new List<string>();
 
             foreach (var line in _lines)
@@ -60,12 +63,28 @@ namespace TeaboxDataFormat.IO
                 else if (type == TeaboxDataLineType.Data)
                 {
                     string line_data = "";
-                    for (int i = 0; i < _titles.Length; i++)
+
+                    if(_titles == null || _titles.Length == 0)
                     {
-                        if (i > 0)
-                            line_data += DataDelimiter;
-                        line_data += TeaboxDataLine.GetData(line, _titles[i]);
+                        var parts = TeaboxDataLine.GetData(line);
+
+                        for (int i = 0; i < parts.Count; i++)
+                        {
+                            if (i > 0)
+                                line_data += DataDelimiter;
+                            line_data += parts[i];
+                        }
                     }
+                    else
+                    {
+                        for (int i = 0; i < _titles.Length; i++)
+                        {
+                            if (i > 0)
+                                line_data += DataDelimiter;
+                            line_data += TeaboxDataLine.GetData(line, _titles[i]);
+                        }
+                    }
+                    
 
                     raw_line += line_data;
                 }
