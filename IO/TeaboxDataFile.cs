@@ -99,7 +99,7 @@ namespace TeaboxDataFormat.IO
 
                     foreach (var prop in new_item.GetType().GetProperties())
                     {
-                        var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), false);
+                        var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
                         if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
                         {
@@ -117,17 +117,55 @@ namespace TeaboxDataFormat.IO
                                 DateTime.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
                                 prop.SetValue(new_item, v);
                             }
+                            else if (prop.PropertyType == typeof(bool))
+                            {
+                                bool v = false;
+                                bool.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                                prop.SetValue(new_item, v);
+                            }
                             else
                                 throw new Exception("Property type not supported.");
                         }
                     }
-
                     result.Add(new_item);
                 }
 
             }
 
             return result;
+        }
+
+        public void MergeData<input_type>(IEnumerable<input_type> data, string key) where input_type : TeaboxDataLine
+        {
+            foreach(var data_item in data)
+            {
+                var merge_target = _lines
+                    .First(x =>
+                    TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
+                    TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key));
+
+                if(merge_target != null)
+                {
+                    TeaboxDataLine.SetData(merge_target, TeaboxDataLine.GetData(data_item));
+                    TeaboxDataLine.SetTitles(merge_target, TeaboxDataLine.GetTitles(data_item));
+                }
+                else
+                {
+                    // ToDo Test
+                    _lines.Add(data_item);
+                    merge_target = data_item;
+                }
+
+                foreach (var prop in data_item.GetType().GetProperties())
+                {
+                    var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+
+                    if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                    {
+                        TeaboxDataLine.SetData(merge_target, prop.Name, prop.GetValue(data_item).ToString());
+                    }
+                }
+            }
         }
 
         public TeaboxDataLine this[int index]
