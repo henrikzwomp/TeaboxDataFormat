@@ -8,7 +8,7 @@ namespace TeaboxDataFormat.IO
 {
     public abstract class TeaboxDataFileBase<item_type> : TeaboxDataFileReader where item_type : TeaboxDataLine, new()
     {
-        protected IList<item_type> _lines; // ToDo: Change to IEnumerable ?
+        protected IList<item_type> _lines;
         protected string[] _titles;
 
         protected void ReadFile(IFileContainer file)

@@ -17,7 +17,7 @@ namespace TeaboxDataFormat.IO
         {
             _data = new List<string>();
             _titles = new List<string>();
-            _type = TeaboxDataLineType.Other; // ToDo Default to data? Set to data if data added?
+            _type = TeaboxDataLineType.Data; // Default to data because that is the most common reason for creating a line.
             _comment = "";
         }
 

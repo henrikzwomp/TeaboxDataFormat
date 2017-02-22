@@ -562,10 +562,191 @@ namespace TeaboxDataFormat.Tests.IO
             }
         }
 
+        [Test]
+        public void GetDataAsWorksWithStringProperties()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!DateField1\tDateField2",
+                    "Hello\tWorld",
+                    "// A bit of a comment",
+                    "Something\tElse",
+                });
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result.Count(x => x.DateField1 == "Hello" && x.DateField2 == "World"), Is.EqualTo(1));
+            Assert.That(result.Count(x => x.DateField1 == "Something" && x.DateField2 == "Else"), Is.EqualTo(1));
+        }
+
+        public class TestItemForGetDataAsWorksWithStringProperties : TeaboxDataLine
+        {
+            [TeaboxData]
+            public string DateField1 { get; set; }
+            [TeaboxData]
+            public string DateField2 { get; set; }
+        }
+
+        [Test]
+        public void GetDataAsWorksWithIntAndDateTimeProperties()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!MyRowID\tMyRowData\tMyEditDate",
+                    "11\tHello\t2017-02-11",
+                    "// A bit of a comment",
+                    "22\tWorld\t2017-01-12",
+                });
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithIntAndDateTimeProperties>();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result.Count(x => x.MyRowID == 11 && x.MyEditDate == new DateTime(2017, 2, 11)), Is.EqualTo(1));
+            Assert.That(result.Count(x => x.MyRowID == 22 && x.MyEditDate == new DateTime(2017, 1, 12)), Is.EqualTo(1));
+        }
+
+        public class TestItemForGetDataAsWorksWithIntAndDateTimeProperties : TeaboxDataLine
+        {
+            [TeaboxData]
+            public int MyRowID { get; set; }
+            [TeaboxData]
+            public DateTime MyEditDate { get; set; }
+        }
+
+        [Test]
+        public void GetDataAsWorksWithBoolProperties()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!Id\tWorks",
+                    "1\tfalse",
+                    "2\t",
+                    "3\ttrue",
+                });
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithBoolProperties>();
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result.Count(x => x.Id == 1 && x.Works == false), Is.EqualTo(1));
+            Assert.That(result.Count(x => x.Id == 2 && x.Works == false), Is.EqualTo(1));
+            Assert.That(result.Count(x => x.Id == 3 && x.Works == true), Is.EqualTo(1));
+        }
+
+        public class TestItemForGetDataAsWorksWithBoolProperties : TeaboxDataLine
+        {
+            [TeaboxData]
+            public int Id { get; set; }
+            [TeaboxData]
+            public bool Works { get; set; }
+        }
+
+        [Test]
+        public void CanMergeData()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!DateField1\tDateField2",
+                    "Hello\tWorld",
+                    "// A bit of a comment",
+                    "Something\tElse",
+                });
+
+            IList<string> result = new List<string>();
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+
+            data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
+            data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+
+            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.Save();
+
+            Assert.That(result.Count, Is.EqualTo(4));
+            Assert.That(result[0], Is.EqualTo("!DateField1\tDateField2"));
+            Assert.That(result[1], Is.EqualTo("Hello\tMe"));
+            Assert.That(result[2], Is.EqualTo("// A bit of a comment"));
+            Assert.That(result[3], Is.EqualTo("Something\tWicked"));
+        }
+
+        [Test]
+        public void WillAddNewRowsWhenMergingData()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!DateField1\tDateField2",
+                    "Hello\tWorld",
+                    "// A bit of a comment",
+                    "Something\tElse",
+                });
+
+            IList<string> result = new List<string>();
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+
+            data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
+            data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
+
+            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.Save();
+
+            Assert.That(result.Count, Is.EqualTo(5));
+            Assert.That(result[0], Is.EqualTo("!DateField1\tDateField2"));
+            Assert.That(result[1], Is.EqualTo("Hello\tMe"));
+            Assert.That(result[2], Is.EqualTo("// A bit of a comment"));
+            Assert.That(result[3], Is.EqualTo("Something\tWicked"));
+            Assert.That(result[4], Is.EqualTo("XX\tYY"));
+        }
+
+        [Test]
+        public void CanOpenFileBasedOnATeaboxDataLineChildObject()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>() {});
+
+            IList<string> result = new List<string>();
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
+
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
+            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+
+            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
+            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
+
+            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.Save();
+
+            Console.WriteLine(result[0]);
+            Console.WriteLine(result[1]);
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result[0], Is.EqualTo("!DateField1\tDateField2"));
+            Assert.That(result[1], Is.EqualTo("Hello\tWorld"));
+            Assert.That(result[2], Is.EqualTo("XX\tYY"));
+        }
+
         // ToDo: White space not preserved test
         // Comment in title perserved
         // Can save new object with values in correct columns
         // Write line with more data than titles???
+        /*
+            ToDo Fix so code can handled 3 annoying characters in the beginning of UTF8 text file.
+            https://en.wikipedia.org/wiki/Byte_order_mark
+            http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
+        */
 
     }
 }

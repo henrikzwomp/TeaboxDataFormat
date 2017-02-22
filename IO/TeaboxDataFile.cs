@@ -15,7 +15,27 @@ namespace TeaboxDataFormat.IO
             _file = file;
             ReadFile(_file);
         }
-        
+
+        protected TeaboxDataFile(IFileContainer file, IList<string> titles)
+        {
+            _titles = titles.ToArray();
+            _file = file;
+            ReadFile(_file);
+
+            if(_lines.Any(x => TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Titles)) // ToDo Test that titles will be updated
+            {
+                var titles_line = _lines.First(x => TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Titles);
+                TeaboxDataLine.SetData(titles_line, titles);
+            }
+            else
+            {
+                var titles_line = new TeaboxDataLine();
+                TeaboxDataLine.SetData(titles_line, titles);
+                TeaboxDataLine.SetLineType(titles_line, TeaboxDataLineType.Titles);
+                _lines.Insert(0, titles_line);
+            }
+        }
+
         public static TeaboxDataFile Open(string file_path)
         {
             return Open(new FileContainer(file_path));
@@ -24,6 +44,28 @@ namespace TeaboxDataFormat.IO
         public static TeaboxDataFile Open(IFileContainer file)
         {
             return new TeaboxDataFile(file);
+        }
+
+        public static TeaboxDataFile Open<based_on>(string file_path) where based_on : TeaboxDataLine, new()
+        {
+            return Open<based_on>(new FileContainer(file_path, true));
+        }
+
+        public static TeaboxDataFile Open<based_on>(IFileContainer file_path) where based_on : TeaboxDataLine, new()
+        {
+            var titles = new List<string>();
+
+            foreach (var prop in typeof(based_on).GetProperties())
+            {
+                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+
+                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                {
+                    titles.Add(prop.Name);
+                }
+            }
+
+            return new TeaboxDataFile(file_path, titles);
         }
 
         public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, string file_path)
@@ -57,8 +99,8 @@ namespace TeaboxDataFormat.IO
         }
 
         /// <summary>
-        /// ToDo
-        /// By Reference
+        /// Get all lines with data as TeaboxDataTable object
+        /// Data is referenced to back to TeaboxDataFile object.
         /// </summary>
         /// <returns></returns>
         public TeaboxDataTable GetData()
@@ -81,11 +123,11 @@ namespace TeaboxDataFormat.IO
         }
 
         /// <summary>
-        /// ToDo
+        /// Get all lines with data in list with object of choosen type
         /// </summary>
-        /// <typeparam name="output_type"></typeparam>
+        /// <typeparam name="output_type">Object that is child of TeaboxDataLine class</typeparam>
         /// <returns></returns>
-        public IEnumerable<output_type> GetDataAs<output_type>() where output_type : TeaboxDataLine, new()
+        public IList<output_type> GetDataAs<output_type>() where output_type : TeaboxDataLine, new()
         {
             var result = new List<output_type>();
 
@@ -96,8 +138,8 @@ namespace TeaboxDataFormat.IO
                     var new_item = new output_type();
                     TeaboxDataLine.SetData(new_item, TeaboxDataLine.GetData(line));
                     TeaboxDataLine.SetTitles(new_item, TeaboxDataLine.GetTitles(line));
-
-                    foreach (var prop in new_item.GetType().GetProperties())
+                    
+                    foreach (var prop in typeof(output_type).GetProperties())
                     {
                         var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
@@ -123,6 +165,12 @@ namespace TeaboxDataFormat.IO
                                 bool.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
                                 prop.SetValue(new_item, v);
                             }
+                            else if (prop.PropertyType == typeof(double))
+                            {
+                                double v = 0;
+                                double.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                                prop.SetValue(new_item, v);
+                            }
                             else
                                 throw new Exception("Property type not supported.");
                         }
@@ -135,14 +183,29 @@ namespace TeaboxDataFormat.IO
             return result;
         }
 
+        // ToDo: Test what happens when key is duplicate
+        // ToDo: Rename? UpdateData? UpdateAndMergeData?
+        /// <summary>
+        /// ToDo
+        /// </summary>
+        /// <typeparam name="input_type"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="key"></param>
         public void MergeData<input_type>(IEnumerable<input_type> data, string key) where input_type : TeaboxDataLine
         {
             foreach(var data_item in data)
             {
-                var merge_target = _lines
-                    .First(x =>
+                TeaboxDataLine merge_target = null;
+
+                if(_lines.Any(x =>
                     TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
-                    TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key));
+                    TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key)))
+                {
+                    merge_target = _lines
+                        .First(x =>
+                        TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
+                        TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key));
+                }
 
                 if(merge_target != null)
                 {
@@ -151,7 +214,6 @@ namespace TeaboxDataFormat.IO
                 }
                 else
                 {
-                    // ToDo Test
                     _lines.Add(data_item);
                     merge_target = data_item;
                 }
