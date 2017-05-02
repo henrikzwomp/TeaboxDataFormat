@@ -16,21 +16,37 @@ namespace TeaboxDataFormat.IO
             ReadFile(_file);
         }
 
-        protected TeaboxDataFile(IFileContainer file, IList<string> titles)
+        protected TeaboxDataFile(IFileContainer file, IList<string> titles_template)
         {
-            _titles = titles.ToArray();
             _file = file;
             ReadFile(_file);
 
             if(_lines.Any(x => TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Titles)) // ToDo Test that titles will be updated
             {
+                var new_titles = new List<string>(_titles);
+
+                foreach(var title in titles_template)
+                {
+                    if(!_titles.Contains(title))
+                    {
+                        new_titles.Add(title);
+                    }
+                }
+
+                _titles = new_titles.ToArray();
+
                 var titles_line = _lines.First(x => TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Titles);
-                TeaboxDataLine.SetData(titles_line, titles);
+                TeaboxDataLine.SetData(titles_line, _titles);
             }
             else
             {
+                if(_lines.Any(x => TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data)) // ToDo Test
+                {
+                    throw new Exception("Can't set titles on data with new current titles.");
+                }
+
                 var titles_line = new TeaboxDataLine();
-                TeaboxDataLine.SetData(titles_line, titles);
+                TeaboxDataLine.SetData(titles_line, titles_template);
                 TeaboxDataLine.SetLineType(titles_line, TeaboxDataLineType.Titles);
                 _lines.Insert(0, titles_line);
             }
@@ -46,11 +62,13 @@ namespace TeaboxDataFormat.IO
             return new TeaboxDataFile(file);
         }
 
+        // ToDo Add description to why this is useful
         public static TeaboxDataFile Open<based_on>(string file_path) where based_on : TeaboxDataLine, new()
         {
             return Open<based_on>(new FileContainer(file_path, true));
         }
 
+        // ToDo Add description to why this is useful
         public static TeaboxDataFile Open<based_on>(IFileContainer file_path) where based_on : TeaboxDataLine, new()
         {
             var titles = new List<string>();
@@ -185,47 +203,53 @@ namespace TeaboxDataFormat.IO
 
         // ToDo: Test what happens when key is duplicate
         // ToDo: Rename? UpdateData? UpdateAndMergeData?
+        // ToDo: Replace this with a better solution
         /// <summary>
         /// ToDo
         /// </summary>
         /// <typeparam name="input_type"></typeparam>
-        /// <param name="data"></param>
+        /// <param name="new_data"></param>
         /// <param name="key"></param>
-        public void MergeData<input_type>(IEnumerable<input_type> data, string key) where input_type : TeaboxDataLine
+        public void MergeData<input_type>(IEnumerable<input_type> new_data, string key) where input_type : TeaboxDataLine
         {
-            foreach(var data_item in data)
+            foreach(var new_data_item in new_data)
             {
-                TeaboxDataLine merge_target = null;
-
-                if(_lines.Any(x =>
-                    TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
-                    TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key)))
-                {
-                    merge_target = _lines
-                        .First(x =>
-                        TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
-                        TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(data_item, key));
-                }
-
-                if(merge_target != null)
-                {
-                    TeaboxDataLine.SetData(merge_target, TeaboxDataLine.GetData(data_item));
-                    TeaboxDataLine.SetTitles(merge_target, TeaboxDataLine.GetTitles(data_item));
-                }
-                else
-                {
-                    _lines.Add(data_item);
-                    merge_target = data_item;
-                }
-
-                foreach (var prop in data_item.GetType().GetProperties())
+                // Set data from properties 
+                // ToDo test that data set to properties is used when merging (copied to data collection first)
+                foreach (var prop in new_data_item.GetType().GetProperties())
                 {
                     var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
                     if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
                     {
-                        TeaboxDataLine.SetData(merge_target, prop.Name, prop.GetValue(data_item).ToString());
+                        TeaboxDataLine.SetData(new_data_item, prop.Name, prop.GetValue(new_data_item).ToString());
                     }
+                }
+
+                // Look for same row in target
+                TeaboxDataLine merge_target = null;
+
+                if(_lines.Any(x =>
+                    TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
+                    TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(new_data_item, key)))
+                {
+                    merge_target = _lines
+                        .First(x =>
+                        TeaboxDataLine.GetLineType(x) == TeaboxDataLineType.Data &&
+                        TeaboxDataLine.GetData(x, key) == TeaboxDataLine.GetData(new_data_item, key));
+                }
+                else
+
+                // Copy data or add new row
+                if(merge_target != null)
+                {
+                    TeaboxDataLine.SetData(merge_target, TeaboxDataLine.GetData(new_data_item));
+                    TeaboxDataLine.SetTitles(merge_target, TeaboxDataLine.GetTitles(new_data_item));
+                }
+                else
+                {
+                    _lines.Add(new_data_item);
+                    merge_target = new_data_item;
                 }
             }
         }
@@ -252,5 +276,7 @@ namespace TeaboxDataFormat.IO
         {
             WriteFile(_file);
         }
+
+        
     }
 }

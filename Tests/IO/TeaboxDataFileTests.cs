@@ -729,13 +729,94 @@ namespace TeaboxDataFormat.Tests.IO
             data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
             data_file.Save();
 
-            Console.WriteLine(result[0]);
-            Console.WriteLine(result[1]);
-
             Assert.That(result.Count, Is.EqualTo(3));
             Assert.That(result[0], Is.EqualTo("!DateField1\tDateField2"));
             Assert.That(result[1], Is.EqualTo("Hello\tWorld"));
             Assert.That(result[2], Is.EqualTo("XX\tYY"));
+        }
+
+        [Test]
+        public void BasedOnClassPropertyOrderWillNotChangeOrderInFile2()
+        {
+            var file_container = new Mock<IFileContainer>();
+            file_container.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
+                "!FullName\tTickerSymbol\tGooglePrefix\tYahooSufix\tLastDownloadAttempt\tSuccessfulDownload\t",
+                "Clas Ohlson AB\tCLAS-B\tSTO\tST\t2017-04-23 07:41\tTRUE\t",
+                "Scandi Standard\tSCST\tSTO\tST\t",
+            });
+
+            var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
+            var result = stock_list_file.GetDataAs<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+
+            Assert.That(result[0].FullName, Is.EqualTo("Clas Ohlson AB"));
+            Assert.That(result[0].TickerSymbol, Is.EqualTo("CLAS-B"));
+            Assert.That(result[0].GooglePrefix, Is.EqualTo("STO"));
+            Assert.That(result[0].YahooSufix, Is.EqualTo("ST"));
+            Assert.That(result[0].LastDownloadAttempt, Is.EqualTo(new DateTime(2017, 4, 23, 7, 41, 0)));
+            Assert.That(result[0].SuccessfulDownload, Is.EqualTo(true));
+
+            Assert.That(result[1].FullName, Is.EqualTo("Scandi Standard"));
+            Assert.That(result[1].TickerSymbol, Is.EqualTo("SCST"));
+            Assert.That(result[1].GooglePrefix, Is.EqualTo("STO"));
+            Assert.That(result[1].YahooSufix, Is.EqualTo("ST"));
+            Assert.That(result[1].LastDownloadAttempt, Is.EqualTo(DateTime.MinValue));
+            Assert.That(result[1].SuccessfulDownload, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void BasedOnClassPropertyOrderWillNotChangeOrderInFile()
+        {
+            var file_container = new Mock<IFileContainer>();
+            file_container.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
+                "!FullName\tTickerSymbol\tGooglePrefix\tYahooSufix\tLastDownloadAttempt\tSuccessfulDownload\t",
+                "Clas Ohlson AB\tCLAS-B\tSTO\tST\t2017-04-23 07:41\tTRUE\t",
+                "Scandi Standard\tSCST\tSTO\tST\t",
+            });
+
+            var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
+            var result = stock_list_file.GetData();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+
+            Assert.That(result[0]["FullName"], Is.EqualTo("Clas Ohlson AB"));
+            Assert.That(result[0]["TickerSymbol"], Is.EqualTo("CLAS-B"));
+            Assert.That(result[0]["GooglePrefix"], Is.EqualTo("STO"));
+            Assert.That(result[0]["YahooSufix"], Is.EqualTo("ST"));
+            Assert.That(result[0]["LastDownloadAttempt"], Is.EqualTo("2017-04-23 07:41"));
+            Assert.That(result[0]["SuccessfulDownload"], Is.EqualTo("TRUE"));
+
+            Assert.That(result[1]["FullName"], Is.EqualTo("Scandi Standard"));
+            Assert.That(result[1]["TickerSymbol"], Is.EqualTo("SCST"));
+            Assert.That(result[1]["GooglePrefix"], Is.EqualTo("STO"));
+            Assert.That(result[1]["YahooSufix"], Is.EqualTo("ST"));
+            Assert.That(result[1]["LastDownloadAttempt"], Is.EqualTo(""));
+            Assert.That(result[1]["SuccessfulDownload"], Is.EqualTo(""));
+        }
+
+        public class TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile : TeaboxDataLine
+        {
+            [TeaboxData]
+            public string TickerSymbol { get; set; }
+            [TeaboxData]
+            public string GooglePrefix { get; set; }
+            [TeaboxData]
+            public string YahooSufix { get; set; }
+            [TeaboxData]
+            public string FullName { get; set; }
+            [TeaboxData]
+            public DateTime LastDownloadAttempt { get; set; }
+            [TeaboxData]
+            public bool SuccessfulDownload { get; set; }
+
+            // ToDo Move
+            [TeaboxData]
+            public bool YahooDownloadFailed { get; set; }
+            [TeaboxData]
+            public string YahooDownloadFile { get; set; }
+            [TeaboxData]
+            public DateTime YahooDownloadDate { get; set; }
         }
 
         // ToDo: White space not preserved test
@@ -747,6 +828,7 @@ namespace TeaboxDataFormat.Tests.IO
             https://en.wikipedia.org/wiki/Byte_order_mark
             http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
         */
+
 
     }
 }
