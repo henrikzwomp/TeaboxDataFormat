@@ -462,42 +462,7 @@ namespace TeaboxDataFormat.Tests.IO
                 ReadFile(file);
             }
         }
-
-        [Test]
-        public void CanTurnDataTableToFile()
-        {
-            IList<string> result = new List<string>();
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
-            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback((IList<string> y) => result = y);
-
-            var data_table = new TeaboxDataTable("Brick", "Color", "Amount");
-
-            var brick_3001 = new TeaboxDataRow();
-            brick_3001["Brick"] = "3001";
-            brick_3001["Color"] = "Red";
-            brick_3001["Amount"] = "18";
-
-            var brick_3003 = new TeaboxDataRow();
-            TeaboxDataLine.SetData(brick_3003, "Brick", "3004");
-            TeaboxDataLine.SetData(brick_3003, "Color", "Blue");
-            TeaboxDataLine.SetData(brick_3003, "Amount", "22");
-
-            TeaboxDataLine.SetComment(brick_3003, "Data line #2");
-
-            data_table.Add(brick_3001);
-            data_table.Add(brick_3003);
-
-            var data_file = TeaboxDataFile.DataTableToFile(data_table, file.Object);
-            data_file.Save();
-
-            Assert.That(result.Count, Is.EqualTo(3));
-            Assert.That(result[0], Is.EqualTo("!Brick\tColor\tAmount"));
-            Assert.That(result[1], Is.EqualTo("3001\tRed\t18"));
-            Assert.That(result[2], Is.EqualTo("3004\tBlue\t22 //Data line #2"));
-
-        }
-
+        
         [Test]
         public void CanHandleNoTitlesWritingFileWithoutReadingItFirst()
         {
@@ -648,7 +613,7 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void CanMergeData()
+        public void CanUpdateAndMergeData()
         {
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
@@ -668,7 +633,7 @@ namespace TeaboxDataFormat.Tests.IO
             data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
 
-            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(4));
@@ -700,7 +665,7 @@ namespace TeaboxDataFormat.Tests.IO
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(5));
@@ -726,7 +691,7 @@ namespace TeaboxDataFormat.Tests.IO
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.MergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(3));
@@ -829,6 +794,268 @@ namespace TeaboxDataFormat.Tests.IO
             http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
         */
 
+        #region IList and ICollection tests
+        [Test]
+        public void CanGetAndSetLinesWithIndex()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
 
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(test_line_1);
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file[1], Is.EqualTo(test_line_1));
+
+            var test_line_2 = new TeaboxDataLine();
+            data_file[1] = test_line_2;
+
+            Assert.That(data_file[1], Is.EqualTo(test_line_2));
+        }
+
+        [Test]
+        public void CanUseIndexOfMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(test_line_1);
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void CanUseInsertMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+
+            data_file.Insert(1, test_line_1);
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InsertMethodWillSetTitlesOnNewLine()
+        {
+            var text_lines = new List<string>()
+            {
+                "// This file is for...",
+                "!File\tSize\tSomething",
+                "stuff.txt\t11\t...",
+                "stuff2.txt\t17\t...// my comment",
+                "//stuff3.txt\t11\t..."
+            };
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(0));
+
+            data_file.Insert(4, test_line_1);
+
+            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void CanUseRemoveAtMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(test_line_1);
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
+
+            data_file.RemoveAt(1);
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void CanUseAddMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+            data_file.Add(test_line_1);
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(0));
+        }
+
+        [Test]
+        public void AddMethodWillSetTitlesOnNewLine()
+        {
+            var text_lines = new List<string>()
+            {
+                "// This file is for...",
+                "!File\tSize\tSomething",
+                "stuff.txt\t11\t...",
+                "stuff2.txt\t17\t...// my comment",
+                "//stuff3.txt\t11\t..."
+            };
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+
+            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(0));
+
+            data_file.Add(test_line_1);
+
+            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void CanUseClearMethod()
+        {
+            var text_lines = new List<string>()
+            {
+                "// This file is for...",
+                "!File\tSize\tSomething",
+                "stuff.txt\t11\t...",
+                "stuff2.txt\t17\t...// my comment",
+                "//stuff3.txt\t11\t..."
+            };
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            Assert.That(data_file.Count, Is.EqualTo(5));
+
+            data_file.Clear();
+
+            Assert.That(data_file.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void CanUseContainsMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.Contains(test_line_1), Is.EqualTo(false));
+
+            data_file.Add(test_line_1);
+
+            Assert.That(data_file.Contains(test_line_1), Is.EqualTo(true));
+        }
+
+        [Test]
+        public void CanUseCopyToMethod()
+        {
+            var text_lines = new List<string>()
+            {
+                "// This file is for...",
+                "!File\tSize\tSomething",
+                "stuff.txt\t11\t...",
+                "stuff2.txt\t17\t...// my comment",
+                "//stuff3.txt\t11\t..."
+            };
+
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+
+            var lines = new TeaboxDataLine[5];
+
+            data_file.CopyTo(lines, 0);
+
+            Assert.That(TeaboxDataLine.GetData(lines[2],"File"), Is.EqualTo("stuff.txt"));
+        }
+
+        [Test]
+        public void CanUseRemoveMethod()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var test_line_1 = new TeaboxDataLine();
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            data_file.Add(new TeaboxDataLine());
+            data_file.Add(test_line_1);
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
+
+            data_file.Remove(test_line_1);
+
+            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void CanUseCountProperty()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+
+            var data_file = TeaboxDataFile.Open(file.Object);
+
+            Assert.That(data_file.Count, Is.EqualTo(0));
+
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.Count, Is.EqualTo(1));
+
+            data_file.Add(new TeaboxDataLine());
+
+            Assert.That(data_file.Count, Is.EqualTo(2));
+        }
+
+        #endregion
+        
     }
 }

@@ -12,6 +12,7 @@ namespace TeaboxDataFormat.IO
         protected IList<string> _titles;
         protected string _comment;
         protected TeaboxDataLineType _type;
+        protected readonly Guid _unique_instance_id;
 
         public TeaboxDataLine()
         {
@@ -19,6 +20,7 @@ namespace TeaboxDataFormat.IO
             _titles = new List<string>();
             _type = TeaboxDataLineType.Data; // Default to data because that is the most common reason for creating a line.
             _comment = "";
+            _unique_instance_id = Guid.NewGuid();
         }
 
         protected string this[int index]
@@ -167,6 +169,25 @@ namespace TeaboxDataFormat.IO
             line._type = type;
         }
 
+        public static Guid GetUniqueInstanceId(TeaboxDataLine line)
+        {
+            return line._unique_instance_id;
+        }
+
         #endregion
+
+        public override bool Equals(object obj)
+        {
+            if(obj is TeaboxDataLine)
+            {
+                return (_unique_instance_id == ((TeaboxDataLine)obj)._unique_instance_id);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return _unique_instance_id.GetHashCode();
+        }
     }
 }

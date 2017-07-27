@@ -58,5 +58,16 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(TeaboxDataLine.GetData(line, "Hello", "Def"), Is.EqualTo("")); // Adding new value set "" on column before new
             Assert.That(TeaboxDataLine.GetData(line, "World", "Def"), Is.EqualTo("Test"));
         }
+
+        [Test]
+        public void CanCompareWithEqualsMethod()
+        {
+            var item1 = new TeaboxDataLine();
+            var item2 = new TeaboxDataLine();
+
+            Assert.That(item1.Equals(item1), Is.True);
+            Assert.That(item1.Equals(item2), Is.False);
+            Assert.That(item1.Equals("Something"), Is.False);
+        }
     }
 }
