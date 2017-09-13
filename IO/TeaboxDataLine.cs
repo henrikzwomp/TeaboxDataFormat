@@ -169,11 +169,66 @@ namespace TeaboxDataFormat.IO
             line._type = type;
         }
 
+        // ToDo Possible to remove _unique_instance_id ?
         public static Guid GetUniqueInstanceId(TeaboxDataLine line)
         {
             return line._unique_instance_id;
         }
 
+        // ToDo Write tests for this
+        public static void SetDataFromProperties(TeaboxDataLine line)
+        {
+            foreach (var prop in line.GetType().GetProperties())
+            {
+                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+
+                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                {
+                    TeaboxDataLine.SetData(line, prop.Name, prop.GetValue(line).ToString());
+                }
+            }
+        }
+
+        // ToDo Write tests for this
+        public static void SetPropertiesFromData<line_type>(TeaboxDataLine line) where line_type : TeaboxDataLine
+        {
+            foreach (var prop in typeof(line_type).GetProperties())
+            {
+                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+
+                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                {
+                    if (prop.PropertyType == typeof(string))
+                        prop.SetValue(line, TeaboxDataLine.GetData(line, prop.Name));
+                    else if (prop.PropertyType == typeof(int))
+                    {
+                        int v = 0;
+                        int.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                        prop.SetValue(line, v);
+                    }
+                    else if (prop.PropertyType == typeof(DateTime))
+                    {
+                        DateTime v = DateTime.MinValue;
+                        DateTime.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                        prop.SetValue(line, v);
+                    }
+                    else if (prop.PropertyType == typeof(bool))
+                    {
+                        bool v = false;
+                        bool.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                        prop.SetValue(line, v);
+                    }
+                    else if (prop.PropertyType == typeof(double))
+                    {
+                        double v = 0;
+                        double.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                        prop.SetValue(line, v);
+                    }
+                    else
+                        throw new Exception("Property type not supported.");
+                }
+            }
+        }
         #endregion
 
         public override bool Equals(object obj)

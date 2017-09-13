@@ -52,6 +52,8 @@ namespace TeaboxDataFormat.IO
 
             foreach (var line in _lines)
             {
+                TeaboxDataLine.SetDataFromProperties(line);
+
                 string comment = TeaboxDataLine.GetComment(line);
                 var type = TeaboxDataLine.GetLineType(line);
 

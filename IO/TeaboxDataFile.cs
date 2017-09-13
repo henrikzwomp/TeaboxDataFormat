@@ -156,46 +156,9 @@ namespace TeaboxDataFormat.IO
                     var new_item = new output_type();
                     TeaboxDataLine.SetData(new_item, TeaboxDataLine.GetData(line));
                     TeaboxDataLine.SetTitles(new_item, TeaboxDataLine.GetTitles(line));
-                    
-                    foreach (var prop in typeof(output_type).GetProperties())
-                    {
-                        var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
-
-                        if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
-                        {
-                            if (prop.PropertyType == typeof(string))
-                                prop.SetValue(new_item, TeaboxDataLine.GetData(line, prop.Name));
-                            else if (prop.PropertyType == typeof(int))
-                            {
-                                int v = 0;
-                                int.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
-                                prop.SetValue(new_item, v);
-                            }
-                            else if (prop.PropertyType == typeof(DateTime))
-                            {
-                                DateTime v = DateTime.MinValue;
-                                DateTime.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
-                                prop.SetValue(new_item, v);
-                            }
-                            else if (prop.PropertyType == typeof(bool))
-                            {
-                                bool v = false;
-                                bool.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
-                                prop.SetValue(new_item, v);
-                            }
-                            else if (prop.PropertyType == typeof(double))
-                            {
-                                double v = 0;
-                                double.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
-                                prop.SetValue(new_item, v);
-                            }
-                            else
-                                throw new Exception("Property type not supported.");
-                        }
-                    }
+                    TeaboxDataLine.SetPropertiesFromData<output_type>(new_item);
                     result.Add(new_item);
                 }
-
             }
 
             return result;
@@ -220,16 +183,8 @@ namespace TeaboxDataFormat.IO
             {
                 // Set data from properties 
                 // ToDo test that data set to properties is used when merging (copied to data collection first)
-                foreach (var prop in new_data_item.GetType().GetProperties())
-                {
-                    var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
-
-                    if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
-                    {
-                        TeaboxDataLine.SetData(new_data_item, prop.Name, prop.GetValue(new_data_item).ToString());
-                    }
-                }
-
+                TeaboxDataLine.SetDataFromProperties(new_data_item);
+                
                 // Look for same row in target
                 TeaboxDataLine merge_target = null;
 
