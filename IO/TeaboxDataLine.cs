@@ -184,7 +184,14 @@ namespace TeaboxDataFormat.IO
 
                 if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
                 {
-                    TeaboxDataLine.SetData(line, prop.Name, prop.GetValue(line).ToString());
+                    var value_object = prop.GetValue(line);
+
+                    var value_string = "";
+
+                    if (value_object != null)
+                        value_string = value_object.ToString();
+
+                    TeaboxDataLine.SetData(line, prop.Name, value_string);
                 }
             }
         }

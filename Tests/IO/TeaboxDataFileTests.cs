@@ -810,8 +810,6 @@ namespace TeaboxDataFormat.Tests.IO
             _tbl_action_log_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(2));
-            Console.WriteLine(result[0]);
-            Console.WriteLine(result[1]);
             Assert.That(result[0], Is.EqualTo("!Action\tNote\tDbName\tMessage\tDateTime\tThreadId"));
             Assert.That(result[1].StartsWith("MyAction\tMyNote\tMyDatabase\tMyMessage\t"), Is.True);
         }
@@ -830,6 +828,36 @@ namespace TeaboxDataFormat.Tests.IO
             public DateTime DateTime { get; set; }
             [TeaboxData]
             public int ThreadId { get; set; }
+        }
+
+        [Test]
+        public void CanSaveWithNewCustomLineAddedThatHasNullValues()
+        {
+            IList<string> result = new List<string>();
+
+            var setting_file = new Mock<IFileContainer>();
+
+            setting_file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
+            setting_file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>()))
+                .Callback<IList<string>>((y) => { result = y; });
+
+            var _tbl_action_log_file = TeaboxDataFile.Open<TestItemForCanSaveWithNewCustomLineAdded>(setting_file.Object);
+
+            var line = new TestItemForCanSaveWithNewCustomLineAdded();
+
+            line.Action = "MyAction";
+            line.Note = "MyNote";
+            line.DbName = null;
+            line.Message = "MyMessage";
+            line.DateTime = DateTime.Now;
+            line.ThreadId = 1;
+
+            _tbl_action_log_file.Add(line);
+            _tbl_action_log_file.Save();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0], Is.EqualTo("!Action\tNote\tDbName\tMessage\tDateTime\tThreadId"));
+            Assert.That(result[1].StartsWith("MyAction\tMyNote\t\tMyMessage\t"), Is.True);
         }
 
         // ToDo: White space not preserved test
