@@ -7,13 +7,21 @@ using System.Collections;
 
 namespace TeaboxDataFormat.IO
 {
-    public class TeaboxDataFile : TeaboxDataFileBase<TeaboxDataLine>
-        , IEnumerable<TeaboxDataLine>
-        , IList<TeaboxDataLine>
+    public class TeaboxDataFile : TeaboxDataFile<TeaboxDataLine>
+    {
+        private TeaboxDataFile(IFileContainer file) : base(file)
+        {
+
+        }
+    }
+
+    public class TeaboxDataFile<line_type> : TeaboxDataFileBase<line_type>
+        , IEnumerable<line_type>
+        , IList<line_type> where line_type : TeaboxDataLine, new()
     {
         IFileContainer _file;
 
-        public TeaboxDataFile(IFileContainer file) 
+        protected TeaboxDataFile(IFileContainer file) 
         {
             _file = file;
             ReadFile(_file);
@@ -24,7 +32,7 @@ namespace TeaboxDataFormat.IO
         /// </summary>
         /// <param name="file">File to Open.</param>
         /// <param name="titles_template">Titles to add to existing titles in file.</param>
-        public TeaboxDataFile(IFileContainer file, IList<string> titles_template)
+        private TeaboxDataFile(IFileContainer file, IList<string> titles_template)
         {
             _file = file;
             ReadFile(_file);
@@ -53,21 +61,21 @@ namespace TeaboxDataFormat.IO
                     throw new Exception("Can't set titles on data with untitled data.");
                 }
 
-                var titles_line = new TeaboxDataLine();
+                var titles_line = new line_type();
                 TeaboxDataLine.SetData(titles_line, titles_template);
                 TeaboxDataLine.SetLineType(titles_line, TeaboxDataLineType.Titles);
                 _lines.Insert(0, titles_line);
             }
         }
         
-        public static TeaboxDataFile Open(string file_path)
+        public static TeaboxDataFile<TeaboxDataLine> Open(string file_path)
         {
             return Open(new FileContainer(file_path, true));
         }
 
-        public static TeaboxDataFile Open(IFileContainer file)
+        public static TeaboxDataFile<TeaboxDataLine> Open(IFileContainer file)
         {
-            return new TeaboxDataFile(file);
+            return new TeaboxDataFile<TeaboxDataLine>(file);
         }
 
         /// <summary>
@@ -76,7 +84,7 @@ namespace TeaboxDataFormat.IO
         /// <typeparam name="based_on"></typeparam>
         /// <param name="file_path"></param>
         /// <returns></returns>
-        public static TeaboxDataFile Open<based_on>(string file_path) where based_on : TeaboxDataLine, new()
+        public static TeaboxDataFile<based_on> Open<based_on>(string file_path) where based_on : TeaboxDataLine, new()
         {
             return Open<based_on>(new FileContainer(file_path, true));
         }
@@ -87,7 +95,7 @@ namespace TeaboxDataFormat.IO
         /// <typeparam name="based_on"></typeparam>
         /// <param name="file_path"></param>
         /// <returns></returns>
-        public static TeaboxDataFile Open<based_on>(IFileContainer file_path) where based_on : TeaboxDataLine, new()
+        public static TeaboxDataFile<based_on> Open<based_on>(IFileContainer file_path) where based_on : TeaboxDataLine, new()
         {
             var titles = new List<string>();
 
@@ -100,20 +108,30 @@ namespace TeaboxDataFormat.IO
                     titles.Add(prop.Name);
                 }
             }
-
-            return new TeaboxDataFile(file_path, titles);
+            return new TeaboxDataFile<based_on>(file_path, titles);
         }
-        
-        [Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
+
+        /*[Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
         public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, string file_path)
         {
             return data_table.ToTeaboxDataFile(file_path);
-        }
+        }*/
 
-        [Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
+        /*[Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
         public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, IFileContainer file)
         {
             return data_table.ToTeaboxDataFile(file);
+        }*/
+
+        /// <summary>
+        /// Get all lines with data as TeaboxDataTable object
+        /// Data is referenced to back to TeaboxDataFile object.
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("Renamed to GetDataTable")]
+        public TeaboxDataTable GetData()
+        {
+            return GetDataTable();
         }
 
         /// <summary>
@@ -121,7 +139,7 @@ namespace TeaboxDataFormat.IO
         /// Data is referenced to back to TeaboxDataFile object.
         /// </summary>
         /// <returns></returns>
-        public TeaboxDataTable GetData()
+        public TeaboxDataTable GetDataTable()
         {
             var result = new TeaboxDataTable(_titles);
 
@@ -141,10 +159,11 @@ namespace TeaboxDataFormat.IO
         }
 
         /// <summary>
-        /// Get all lines with data in list with object of choosen type
+        /// Get all lines with data in list with object of choosen type (data not referenced to file class)
         /// </summary>
         /// <typeparam name="output_type">Object that is child of TeaboxDataLine class</typeparam>
         /// <returns></returns>
+        [Obsolete("This will probably be removed in the future.")]
         public IList<output_type> GetDataAs<output_type>() where output_type : TeaboxDataLine, new()
         {
             var result = new List<output_type>();
@@ -164,27 +183,41 @@ namespace TeaboxDataFormat.IO
             return result;
         }
 
-        [Obsolete("Renamed to UpdateAndMergeData")]
-        public void MergeData<input_type>(IEnumerable<input_type> new_data, string key) where input_type : TeaboxDataLine
+        // <summary>
+        /// Get all lines with data in list with object of choosen type
+        /// </summary>
+        /// <typeparam name="output_type">Object that is child of TeaboxDataLine class</typeparam>
+        /// <returns></returns>
+        public IList<line_type> GetDataLines()
         {
-            UpdateAndMergeData<input_type>(new_data, key);
+            var result = new List<line_type>();
+
+            foreach (var line in _lines)
+            {
+                if (TeaboxDataLine.GetLineType(line) == TeaboxDataLineType.Data)
+                {
+                    result.Add(line);
+                }
+            }
+
+            return result;
         }
 
         // ToDo: Test what happens when key is duplicate
         /// <summary>
         /// ToDo
         /// </summary>
-        /// <typeparam name="input_type"></typeparam>
         /// <param name="new_data"></param>
         /// <param name="key"></param>
-        public void UpdateAndMergeData<input_type>(IEnumerable<input_type> new_data, string key) where input_type : TeaboxDataLine
+        public void UpdateAndMergeData(IEnumerable<line_type> new_data, string key)
         {
             foreach(var new_data_item in new_data)
             {
+
                 // Set data from properties 
                 // ToDo test that data set to properties is used when merging (copied to data collection first)
-                TeaboxDataLine.SetDataFromProperties(new_data_item);
-                
+                TeaboxDataLine.SetDataFromProperties<line_type>(new_data_item);
+
                 // Look for same row in target
                 TeaboxDataLine merge_target = null;
 
@@ -203,6 +236,7 @@ namespace TeaboxDataFormat.IO
                 {
                     TeaboxDataLine.SetData(merge_target, TeaboxDataLine.GetData(new_data_item));
                     TeaboxDataLine.SetTitles(merge_target, TeaboxDataLine.GetTitles(new_data_item));
+                    TeaboxDataLine.SetPropertiesFromData<line_type>(merge_target);
                 }
                 else
                 {
@@ -220,7 +254,7 @@ namespace TeaboxDataFormat.IO
 
         #region IEnumerator, IList and ICollection methods
 
-        public TeaboxDataLine this[int index]
+        public line_type this[int index]
         {
             get
             {
@@ -232,7 +266,7 @@ namespace TeaboxDataFormat.IO
             }
         }
         
-        public IEnumerator<TeaboxDataLine> GetEnumerator()// IEnumerator
+        public IEnumerator<line_type> GetEnumerator()// IEnumerator
         {
             return _lines.GetEnumerator();
         }
@@ -242,12 +276,12 @@ namespace TeaboxDataFormat.IO
             return _lines.GetEnumerator();
         }
 
-        public int IndexOf(TeaboxDataLine item) // IList
+        public int IndexOf(line_type item) // IList
         {
             return _lines.IndexOf(item);
         }
 
-        public void Insert(int index, TeaboxDataLine item) // IList
+        public void Insert(int index, line_type item) // IList
         {
             TeaboxDataLine.SetTitles(item, _titles);
             _lines.Insert(index, item);
@@ -258,7 +292,7 @@ namespace TeaboxDataFormat.IO
             _lines.RemoveAt(index);
         }
 
-        public void Add(TeaboxDataLine item) // ICollection
+        public void Add(line_type item) // ICollection
         {
             TeaboxDataLine.SetTitles(item, _titles);
             _lines.Add(item);
@@ -273,17 +307,17 @@ namespace TeaboxDataFormat.IO
             _lines.Clear();
         }
 
-        public bool Contains(TeaboxDataLine item)
+        public bool Contains(line_type item)
         {
             return _lines.Contains(item);
         }
 
-        public void CopyTo(TeaboxDataLine[] array, int arrayIndex) // ICollection
+        public void CopyTo(line_type[] array, int arrayIndex) // ICollection
         {
             _lines.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(TeaboxDataLine item) // ICollection
+        public bool Remove(line_type item) // ICollection
         {
             return _lines.Remove(item);
         }

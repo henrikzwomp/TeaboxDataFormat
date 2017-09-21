@@ -627,13 +627,13 @@ namespace TeaboxDataFormat.Tests.IO
             IList<string> result = new List<string>();
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
-            var data_file = TeaboxDataFile.Open(file.Object);
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
             var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
 
             data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
 
-            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(4));
@@ -658,14 +658,14 @@ namespace TeaboxDataFormat.Tests.IO
             IList<string> result = new List<string>();
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
-            var data_file = TeaboxDataFile.Open(file.Object);
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
             var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
 
             data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(5));
@@ -691,7 +691,7 @@ namespace TeaboxDataFormat.Tests.IO
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.UpdateAndMergeData<TestItemForGetDataAsWorksWithStringProperties>(data, "DateField1");
+            data_file.UpdateAndMergeData(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(3));
@@ -860,18 +860,78 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result[1].StartsWith("MyAction\tMyNote\t\tMyMessage\t"), Is.True);
         }
 
-        // ToDo: White space not preserved test
-        // Comment in title perserved
-        // Can save new object with values in correct columns
-        // Write line with more data than titles???
-        /*
-            ToDo Fix so code can handled 3 annoying characters in the beginning of UTF8 text file.
-            https://en.wikipedia.org/wiki/Byte_order_mark
-            http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
-        */
-
-        #region IList and ICollection tests
         [Test]
+        public void CanGetDataLinesAndModifyThem()
+        {
+            IList<string> result = new List<string>();
+
+            var db_file = new Mock<IFileContainer>();
+            db_file.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
+                "!DbName\tBackup_SuccessDate\tBackup_Note\tBackup_ActionDate\tCopy_SuccessDate\tCopy_Note\tCopy_ActionDate\tRestore_Note\tRestore_ActionDate\tServer",
+                "MultiDB_Henrik\t2017-09-17 6:17:31\tDone\t2017-09-17 6:17:31\t\t\t\t\t\tiChemSqlServer",
+            });
+
+            db_file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>((y) => { result = y; });
+
+            
+            var tbfile = TeaboxDataFile.Open<TestItemForXXX>(db_file.Object);
+
+            var line = tbfile.GetDataLines().Where(x => x.DbName == "MultiDB_Henrik").FirstOrDefault();
+
+
+            Assert.That(TeaboxDataLine.GetLineType(line), Is.EqualTo(TeaboxDataLineType.Data));
+
+            line.DbName = "MultiDB_Henrik";
+            line.Server = "iChemSqlServer";
+            line.Backup_SuccessDate = "2017-09-20 8:17:31";
+            line.Backup_Note = "Done";
+            line.Backup_ActionDate = "2017-09-20 8:17:31";
+
+            tbfile.Save();
+
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0], Is.EqualTo("!DbName\tBackup_SuccessDate\tBackup_Note\tBackup_ActionDate\tCopy_SuccessDate\tCopy_Note\tCopy_ActionDate\tRestore_Note\tRestore_ActionDate\tServer"));
+            Assert.That(result[1], Is.EqualTo("MultiDB_Henrik\t2017-09-20 8:17:31\tDone\t2017-09-20 8:17:31\t\t\t\t\t\tiChemSqlServer"));
+
+        }
+
+        private class TestItemForCanGetDataLinesAndModifyThem : TeaboxDataLine
+        {
+            [TeaboxData]
+            public string DbName { get; set; }
+            [TeaboxData]
+            public string Backup_SuccessDate { get; set; }
+            [TeaboxData]
+            public string Backup_Note { get; set; }
+            [TeaboxData]
+            public string Backup_ActionDate { get; set; }
+            [TeaboxData]
+            public string Copy_SuccessDate { get; set; }
+            [TeaboxData]
+            public string Copy_Note { get; set; }
+            [TeaboxData]
+            public string Copy_ActionDate { get; set; }
+            public string Restore_SuccessDate { get; set; }
+            [TeaboxData]
+            public string Restore_Note { get; set; }
+            [TeaboxData]
+            public string Restore_ActionDate { get; set; }
+            [TeaboxData]
+            public string Server { get; set; }
+        }
+
+    // ToDo: White space not preserved test
+    // Comment in title perserved
+    // Can save new object with values in correct columns
+    // Write line with more data than titles???
+    /*
+        ToDo Fix so code can handled 3 annoying characters in the beginning of UTF8 text file.
+        https://en.wikipedia.org/wiki/Byte_order_mark
+        http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
+    */
+
+    #region IList and ICollection tests
+    [Test]
         public void CanGetAndSetLinesWithIndex()
         {
             var file = new Mock<IFileContainer>();

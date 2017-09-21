@@ -70,7 +70,7 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result, Is.EqualTo("Hello World!!!"));
         }
 
-        [Test]
+        /*[Test]
         public void CanTurnDataTableToFile()
         {
             IList<string> result = new List<string>();
@@ -103,6 +103,6 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result[1], Is.EqualTo("3001\tRed\t18"));
             Assert.That(result[2], Is.EqualTo("3004\tBlue\t22 //Data line #2"));
 
-        }
+        }*/
     }
 }

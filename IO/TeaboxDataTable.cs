@@ -48,7 +48,7 @@ namespace TeaboxDataFormat.IO
         public string[] Titles { get { return _titles; } }
 
         
-        public TeaboxDataFile ToTeaboxDataFile(string file_path)
+        /*public TeaboxDataFile ToTeaboxDataFile(string file_path)
         {
             return ToTeaboxDataFile(new FileContainer(file_path, true));
         }
@@ -66,6 +66,6 @@ namespace TeaboxDataFormat.IO
             }
             
             return new_file;
-        }
+        }*/
     }
 }

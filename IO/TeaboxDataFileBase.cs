@@ -39,6 +39,7 @@ namespace TeaboxDataFormat.IO
                 TeaboxDataLine.SetTitles(new_item, _titles);
                 TeaboxDataLine.SetLineType(new_item, ref type);
                 TeaboxDataLine.SetComment(new_item, ref comment);
+                TeaboxDataLine.SetPropertiesFromData<item_type>(new_item);
                 _lines.Add(new_item);
             }
         }
@@ -52,8 +53,6 @@ namespace TeaboxDataFormat.IO
 
             foreach (var line in _lines)
             {
-                TeaboxDataLine.SetDataFromProperties(line);
-
                 string comment = TeaboxDataLine.GetComment(line);
                 var type = TeaboxDataLine.GetLineType(line);
 
@@ -64,6 +63,8 @@ namespace TeaboxDataFormat.IO
                         string.Join(DataDelimiter, TeaboxDataLine.GetData(line)));
                 else if (type == TeaboxDataLineType.Data)
                 {
+                    TeaboxDataLine.SetDataFromProperties<item_type>(line);
+
                     string line_data = "";
 
                     if(_titles == null || _titles.Length == 0)

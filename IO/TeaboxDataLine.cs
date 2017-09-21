@@ -176,9 +176,9 @@ namespace TeaboxDataFormat.IO
         }
 
         // ToDo Write tests for this
-        public static void SetDataFromProperties(TeaboxDataLine line)
+        public static void SetDataFromProperties<line_type>(TeaboxDataLine line) where line_type : TeaboxDataLine
         {
-            foreach (var prop in line.GetType().GetProperties())
+            foreach (var prop in typeof(line_type).GetProperties())
             {
                 var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
