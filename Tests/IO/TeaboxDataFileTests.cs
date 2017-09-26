@@ -874,7 +874,7 @@ namespace TeaboxDataFormat.Tests.IO
             db_file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>((y) => { result = y; });
 
             
-            var tbfile = TeaboxDataFile.Open<TestItemForXXX>(db_file.Object);
+            var tbfile = TeaboxDataFile.Open<TestItemForCanGetDataLinesAndModifyThem>(db_file.Object);
 
             var line = tbfile.GetDataLines().Where(x => x.DbName == "MultiDB_Henrik").FirstOrDefault();
 
