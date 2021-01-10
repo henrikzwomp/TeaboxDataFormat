@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Moq;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using Moq;
 using TeaboxDataFormat.IO;
 
 namespace TeaboxDataFormat.Tests.IO
@@ -892,7 +890,6 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result[0], Is.EqualTo("!DbName\tBackup_SuccessDate\tBackup_Note\tBackup_ActionDate\tCopy_SuccessDate\tCopy_Note\tCopy_ActionDate\tRestore_Note\tRestore_ActionDate\tServer"));
             Assert.That(result[1], Is.EqualTo("MultiDB_Henrik\t2017-09-20 8:17:31\tDone\t2017-09-20 8:17:31\t\t\t\t\t\tiChemSqlServer"));
-
         }
 
         private class TestItemForCanGetDataLinesAndModifyThem : TeaboxDataLine
@@ -920,18 +917,51 @@ namespace TeaboxDataFormat.Tests.IO
             public string Server { get; set; }
         }
 
-    // ToDo: White space not preserved test
-    // Comment in title perserved
-    // Can save new object with values in correct columns
-    // Write line with more data than titles???
-    /*
-        ToDo Fix so code can handled 3 annoying characters in the beginning of UTF8 text file.
-        https://en.wikipedia.org/wiki/Byte_order_mark
-        http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
-    */
+        [Test]
+        public void CanSupportTeaboxDataNoCommentsAttribute()
+        {
+            var file_container = new Mock<IFileContainer>();
+            file_container.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
+                "!TestField",
+                "http://www.link.com",
+                "https://www.link.com",
+                "something // else",
+                "// Blipp",
+            });
 
-    #region IList and ICollection tests
-    [Test]
+            var stock_list_file = TeaboxDataFile.Open<TestItemForCanSupportTeaboxDataNoCommentsAttribute>(file_container.Object);
+    var result = stock_list_file.GetDataLines();
+
+    Assert.That(result.Count, Is.EqualTo(4));
+
+            Assert.That(result[0].TestField, Is.EqualTo("http://www.link.com"));
+            Assert.That(result[1].TestField, Is.EqualTo("https://www.link.com"));
+            Assert.That(result[2].TestField, Is.EqualTo("something // else"));
+            Assert.That(result[3].TestField, Is.EqualTo("// Blipp"));
+        }
+
+        [TeaboxDataNoComments]
+        private class TestItemForCanSupportTeaboxDataNoCommentsAttribute : TeaboxDataLine
+        {
+            [TeaboxData]
+            public string TestField { get; set; }
+        }
+
+
+        // 
+
+        // ToDo: White space not preserved test
+        // Comment in title perserved
+        // Can save new object with values in correct columns
+        // Write line with more data than titles???
+        /*
+            ToDo Fix so code can handled 3 annoying characters in the beginning of UTF8 text file.
+            https://en.wikipedia.org/wiki/Byte_order_mark
+            http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
+        */
+
+        #region IList and ICollection tests
+        [Test]
         public void CanGetAndSetLinesWithIndex()
         {
             var file = new Mock<IFileContainer>();
