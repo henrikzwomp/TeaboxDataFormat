@@ -231,6 +231,12 @@ namespace TeaboxDataFormat.IO
                         double.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
                         prop.SetValue(line, v);
                     }
+                    else if (prop.PropertyType == typeof(decimal)) // ToDo Test
+                    {
+                        decimal v = 0;
+                        decimal.TryParse(TeaboxDataLine.GetData(line, prop.Name), out v);
+                        prop.SetValue(line, v);
+                    }
                     else
                         throw new Exception("Property type not supported.");
                 }
