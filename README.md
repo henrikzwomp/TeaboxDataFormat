@@ -22,7 +22,7 @@ Below is an example of how a file can look.
 // Double slashes starts a comment that will be ignored 
 !Brick	Color	Amount // Line that starts with ! names the columns (not required)
 3001	Red	18 // Data is separated by tabs
-3004	Blue	22
+3004	Blue	22 // Comment must have space or tab infront of it if line also includes data. Otherwise it will be considered part of data.
 ```
 
 It can be read in the following way. 
@@ -30,7 +30,7 @@ It can be read in the following way.
 ```
 var data_file = TeaboxDataFile.Open("X:\\Sample.txt");
 
-var data_table = data_file.GetData(); // Filters out relevant data. Titles, comments and empty lines removed.
+var data_table = data_file.GetDataTable(); // Filters out relevant data. Titles, comments and empty lines removed.
 
 foreach(TeaboxDataRow row in data_table)
 {
@@ -45,6 +45,6 @@ Classes in this library are meant to be extended in project specific child class
 
 ## Requirements / Dependencies
 - .Net Framework 4.5
-- NUnit 2.6.4
-- Moq 4.5.22
-- Castle.Core 3.3.3
+- NUnit 
+- Moq 
+- Castle.Core

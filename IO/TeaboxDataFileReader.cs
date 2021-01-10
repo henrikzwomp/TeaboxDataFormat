@@ -19,10 +19,21 @@ namespace TeaboxDataFormat.IO
             type = TeaboxDataLineType.Other;
             data = new string[0];
 
-            if (!no_comments && line.Contains(CommentIdentifier))
+            if (!no_comments)
             {
-                comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
-                line = line.Substring(0, line.IndexOf(CommentIdentifier));
+                // Starts with "//"
+                if (line.StartsWith(CommentIdentifier))
+                {
+                    comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
+                    return;
+                }
+
+                // Includes " //" or "\t//"
+                if (line.Contains(" " + CommentIdentifier) || line.Contains("\t" + CommentIdentifier))
+                {
+                    comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
+                    line = line.Substring(0, line.IndexOf(CommentIdentifier));
+                }
             }
 
             line = line.TrimEnd();

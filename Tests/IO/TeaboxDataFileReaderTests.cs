@@ -179,5 +179,73 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(data[1], Is.EqualTo("Data2"));
             Assert.That(data[2], Is.EqualTo("Data3"));
         }
+
+        [Test]
+        public void CanHandleStriktCommentRules()
+        {
+            /*
+             * //Comment
+             *  //CommentWithWhiteSpaceFirst
+             * Data1\tDataWith//CommentIdentifier\tData2
+             * Data//FaultyComment
+             * Data //CorrectComment
+             * Data\t//CorrectComment
+             * http://TheReasonForThisStrickness
+             */
+
+            string comment;
+            TeaboxDataLineType type;
+            string[] data;
+
+            TestReader.PublicParseLine("//Comment", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo("Comment"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Other));
+            Assert.That(data.Length, Is.EqualTo(0));
+
+            TestReader.PublicParseLine(" //CommentWithWhiteSpaceFirst", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo("CommentWithWhiteSpaceFirst"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Other));
+            Assert.That(data.Length, Is.EqualTo(0));
+
+            TestReader.PublicParseLine("Data1\tDataWith//CommentIdentifier\tData2", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo(""));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data.Length, Is.EqualTo(3));
+            Assert.That(data[0], Is.EqualTo("Data1"));
+            Assert.That(data[1], Is.EqualTo("DataWith//CommentIdentifier"));
+            Assert.That(data[2], Is.EqualTo("Data2"));
+
+            TestReader.PublicParseLine("Data//FaultyComment", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo(""));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("Data//FaultyComment"));
+
+            TestReader.PublicParseLine("Data //CorrectComment", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo("CorrectComment"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("Data"));
+
+            TestReader.PublicParseLine("Data\t//CorrectComment", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo("CorrectComment"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("Data"));
+
+            TestReader.PublicParseLine("http://TheReasonForThisStrickness", out comment, out type, out data);
+
+            Assert.That(comment, Is.EqualTo(""));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("http://TheReasonForThisStrickness"));
+
+        }
     }
 }
