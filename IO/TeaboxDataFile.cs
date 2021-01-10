@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
+using TeaboxDataFormat.IO;
 
 namespace TeaboxDataFormat.IO
 {
@@ -244,8 +245,6 @@ namespace TeaboxDataFormat.IO
                 }
             }
         }
-
-        
 
         public void Save()
         {
