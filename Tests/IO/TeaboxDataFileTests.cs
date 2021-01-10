@@ -76,7 +76,7 @@ namespace TeaboxDataFormat.Tests.IO
             {
                 "// This file is for...", 
                 "stuff.txt\t11\t...", 
-                "stuff2.txt\t17\t...// my comment",
+                "stuff2.txt\t17\t... // my comment",
                 "//stuff3.txt\t11\t..."
             };
 
@@ -214,7 +214,7 @@ namespace TeaboxDataFormat.Tests.IO
                 "// This file is for...", 
                 "!File\tSize\tSomething",
                 "stuff.txt\t11\t...", 
-                "stuff2.txt\t17\t...// my comment",
+                "stuff2.txt\t17\t... // my comment",
                 "//stuff3.txt\t11\t..."
             };
 
