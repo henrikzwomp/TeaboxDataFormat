@@ -58,7 +58,7 @@ namespace TeaboxDataFormat.Tests.IO
                 File.Delete(test_file_name);
         }
 
-        [Test, ExpectedException]
+        [Test]
         public void WillFailIfFileIsMissingWhenReading()
         {
             string test_file_name = ".\\FileContainerTests_13.txt";
@@ -68,7 +68,7 @@ namespace TeaboxDataFormat.Tests.IO
 
             var file_container = new FileContainer(test_file_name);
 
-            var result = file_container.ReadAllLines();
+            Assert.Throws<Exception>(() => file_container.ReadAllLines());
         }
 
         [Test]
