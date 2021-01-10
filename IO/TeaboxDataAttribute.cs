@@ -9,4 +9,8 @@ namespace TeaboxDataFormat.IO
     public class TeaboxDataAttribute : Attribute // ToDo Check to see if it is possible to limit its use to only properties.
     {
     }
+
+    public class TeaboxDataNoComments : Attribute // ToDo Limit to class?
+    {
+    }
 }

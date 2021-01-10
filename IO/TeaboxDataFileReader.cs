@@ -12,13 +12,14 @@ namespace TeaboxDataFormat.IO
         public const string DataDelimiter = "\t";
         public const string TitleRowIdentifier = "!";
 
-        protected static void ParseLine(string line, out string comment, out TeaboxDataLineType type, out string[] data)
+        protected static void ParseLine(string line, bool no_comments, 
+            out string comment, out TeaboxDataLineType type, out string[] data)
         {
             comment = "";
             type = TeaboxDataLineType.Other;
             data = new string[0];
 
-            if (line.Contains(CommentIdentifier))
+            if (!no_comments && line.Contains(CommentIdentifier))
             {
                 comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
                 line = line.Substring(0, line.IndexOf(CommentIdentifier));
