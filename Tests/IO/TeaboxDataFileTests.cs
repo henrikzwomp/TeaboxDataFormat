@@ -86,7 +86,7 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.ReadAllLines()).Returns(text_lines);
 
             var data_file = TeaboxDataFile.Open(file.Object);
-            var data = data_file.GetData();
+            var data = data_file.GetDataTable();
 
             Assert.That(data.Count, Is.EqualTo(2));
             Assert.That(TeaboxDataLine.GetData(data[0]).Count, Is.EqualTo(3));
@@ -225,7 +225,7 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            var data = data_file.GetData();
+            var data = data_file.GetDataTable();
 
             Assert.That(data.Titles.Length, Is.EqualTo(3));
             Assert.That(data.Titles[0], Is.EqualTo("File"));
@@ -539,8 +539,8 @@ namespace TeaboxDataFormat.Tests.IO
                     "Something\tElse",
                 });
 
-            var data_file = TeaboxDataFile.Open(file.Object);
-            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
+            var result = data_file.GetDataLines();
 
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result.Count(x => x.DateField1 == "Hello" && x.DateField2 == "World"), Is.EqualTo(1));
@@ -567,8 +567,8 @@ namespace TeaboxDataFormat.Tests.IO
                     "22\tWorld\t2017-01-12",
                 });
 
-            var data_file = TeaboxDataFile.Open(file.Object);
-            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithIntAndDateTimeProperties>();
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithIntAndDateTimeProperties>(file.Object);
+            var result = data_file.GetDataLines();
 
             Assert.That(result.Count, Is.EqualTo(2));
             Assert.That(result.Count(x => x.MyRowID == 11 && x.MyEditDate == new DateTime(2017, 2, 11)), Is.EqualTo(1));
@@ -595,8 +595,8 @@ namespace TeaboxDataFormat.Tests.IO
                     "3\ttrue",
                 });
 
-            var data_file = TeaboxDataFile.Open(file.Object);
-            var result = data_file.GetDataAs<TestItemForGetDataAsWorksWithBoolProperties>();
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithBoolProperties>(file.Object);
+            var result = data_file.GetDataLines();
 
             Assert.That(result.Count, Is.EqualTo(3));
             Assert.That(result.Count(x => x.Id == 1 && x.Works == false), Is.EqualTo(1));
@@ -628,7 +628,7 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+            var data = data_file.GetDataLines();
 
             data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
@@ -659,7 +659,7 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+            var data = data_file.GetDataLines();
 
             data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
             data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
@@ -686,7 +686,7 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataAs<TestItemForGetDataAsWorksWithStringProperties>();
+            var data = data_file.GetDataLines();
 
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
             data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
@@ -711,7 +711,7 @@ namespace TeaboxDataFormat.Tests.IO
             });
 
             var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
-            var result = stock_list_file.GetDataAs<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>();
+            var result = stock_list_file.GetDataLines();
 
             Assert.That(result.Count, Is.EqualTo(2));
 
@@ -741,7 +741,7 @@ namespace TeaboxDataFormat.Tests.IO
             });
 
             var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
-            var result = stock_list_file.GetData();
+            var result = stock_list_file.GetDataTable();
 
             Assert.That(result.Count, Is.EqualTo(2));
 
