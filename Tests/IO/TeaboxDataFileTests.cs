@@ -24,16 +24,16 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            Assert.That(data_file.Count(), Is.EqualTo(2));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 0), Is.EqualTo("stuff.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 1), Is.EqualTo("11"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetData(data_file[1]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 0), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 1), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 2), Is.EqualTo("..."));
 
+            Assert.That(TeaboxDataFile.GetLineCount(data_file), Is.EqualTo(2));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 0), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 1), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 2), Is.EqualTo("..."));
         }
 
         [Test]
@@ -53,24 +53,24 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            Assert.That(data_file.Count(), Is.EqualTo(4));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetComment(data_file[0]), Is.EqualTo(" This file is for..."));
-            Assert.That(TeaboxDataLine.GetData(data_file[1]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 0), Is.EqualTo("stuff.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 1), Is.EqualTo("11"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetData(data_file[2]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 0), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 1), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetComment(data_file[2]), Is.EqualTo(" my comment"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetComment(data_file[3]), Is.EqualTo("stuff3.txt\t11\t..."));
+            Assert.That(TeaboxDataFile.GetLineCount(data_file), Is.EqualTo(4));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 0)), Is.EqualTo(" This file is for..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 0), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 1), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 2)), Is.EqualTo(" my comment"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 3)), Is.EqualTo("stuff3.txt\t11\t..."));
         }
 
         [Test]
-        public void CanSortOutData()
+        public void CanFilterOutData()
         {
             var text_lines = new List<string>()
             {
@@ -84,17 +84,21 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.ReadAllLines()).Returns(text_lines);
 
             var data_file = TeaboxDataFile.Open(file.Object);
-            var data = data_file.GetDataTable();
 
-            Assert.That(data.Count, Is.EqualTo(2));
-            Assert.That(TeaboxDataLine.GetData(data[0]).Count, Is.EqualTo(3));
-            Assert.That(data[0][0], Is.EqualTo("stuff.txt"));
-            Assert.That(data[0][1], Is.EqualTo("11"));
-            Assert.That(data[0][2], Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetData(data[1]).Count, Is.EqualTo(3));
-            Assert.That(data[1][0], Is.EqualTo("stuff2.txt"));
-            Assert.That(data[1][1], Is.EqualTo("17"));
-            Assert.That(data[1][2], Is.EqualTo("..."));
+            Assert.That(data_file.Count, Is.EqualTo(2));
+
+            var first_line = data_file.First();
+            var second_line = data_file.Skip(1).First();
+
+            Assert.That(TeaboxDataLine.GetData(first_line).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(first_line, 0), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(first_line, 1), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(first_line, 2), Is.EqualTo("..."));
+            
+            Assert.That(TeaboxDataLine.GetData(second_line).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(second_line, 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(second_line, 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(second_line, 2), Is.EqualTo("..."));
         }
 
         [Test]
@@ -110,12 +114,13 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.ReadAllLines()).Returns(text_lines);
 
             var data_file = TeaboxDataFile.Open(file.Object);
+            var first_line = data_file.First();
 
             Assert.That(data_file.Count(), Is.EqualTo(1));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 0), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 1), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(first_line).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(first_line, 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(first_line, 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(first_line, 2), Is.EqualTo("..."));
         }
 
         [Test]
@@ -135,21 +140,21 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            Assert.That(data_file.Count(), Is.EqualTo(4));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 0), Is.EqualTo("stuff.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 1), Is.EqualTo("11"));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[0]), Is.EqualTo(TeaboxDataLineType.Data));
-            Assert.That(TeaboxDataLine.GetData(data_file[1]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[1]), Is.EqualTo(TeaboxDataLineType.Other));
-            Assert.That(TeaboxDataLine.GetData(data_file[2]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[2]), Is.EqualTo(TeaboxDataLineType.Other));
-            Assert.That(TeaboxDataLine.GetData(data_file[3]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 0), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 1), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[3]), Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(TeaboxDataFile.GetLineCount(data_file), Is.EqualTo(4));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 0), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 1), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 0)), Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 1)), Is.EqualTo(TeaboxDataLineType.Other));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 2)), Is.EqualTo(TeaboxDataLineType.Other));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 3)), Is.EqualTo(TeaboxDataLineType.Data));
         }
 
         [Test]
@@ -170,83 +175,40 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            Assert.That(data_file.Count(), Is.EqualTo(5));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 0), Is.EqualTo(""));
-            Assert.That(TeaboxDataLine.GetComment(data_file[0]), Is.EqualTo(" This file is for..."));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[0]), Is.EqualTo(TeaboxDataLineType.Other));
+            Assert.That(TeaboxDataFile.GetLineCount(data_file), Is.EqualTo(5));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 0), Is.EqualTo(""));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 0)), Is.EqualTo(" This file is for..."));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 0)), Is.EqualTo(TeaboxDataLineType.Other));
 
-            Assert.That(TeaboxDataLine.GetData(data_file[1]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 0), Is.EqualTo("File"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 1), Is.EqualTo("Size"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 2), Is.EqualTo("Something"));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[1]), Is.EqualTo(TeaboxDataLineType.Titles));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 0), Is.EqualTo("File"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 1), Is.EqualTo("Size"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 2), Is.EqualTo("Something"));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 1)), Is.EqualTo(TeaboxDataLineType.Titles));
 
-            Assert.That(TeaboxDataLine.GetData(data_file[2]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 0), Is.EqualTo("stuff.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 1), Is.EqualTo("11"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], "File"), Is.EqualTo("stuff.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], "Size"), Is.EqualTo("11"));
-            Assert.That(TeaboxDataLine.GetData(data_file[2], "Something"), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[2]), Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 0), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 1), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), "File"), Is.EqualTo("stuff.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), "Size"), Is.EqualTo("11"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 2), "Something"), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 2)), Is.EqualTo(TeaboxDataLineType.Data));
 
-            Assert.That(TeaboxDataLine.GetData(data_file[3]).Count, Is.EqualTo(3));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 0), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 1), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], 2), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], "File"), Is.EqualTo("stuff2.txt"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], "Size"), Is.EqualTo("17"));
-            Assert.That(TeaboxDataLine.GetData(data_file[3], "Something"), Is.EqualTo("..."));
-            Assert.That(TeaboxDataLine.GetComment(data_file[3]), Is.EqualTo(" my comment"));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[3]), Is.EqualTo(TeaboxDataLineType.Data));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3)).Count, Is.EqualTo(3));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 0), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 1), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), 2), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), "File"), Is.EqualTo("stuff2.txt"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), "Size"), Is.EqualTo("17"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 3), "Something"), Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 3)), Is.EqualTo(" my comment"));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 3)), Is.EqualTo(TeaboxDataLineType.Data));
 
-            Assert.That(TeaboxDataLine.GetData(data_file[4]).Count, Is.EqualTo(0));
-            Assert.That(TeaboxDataLine.GetComment(data_file[4]), Is.EqualTo("stuff3.txt\t11\t..."));
-            Assert.That(TeaboxDataLine.GetLineType(data_file[4]), Is.EqualTo(TeaboxDataLineType.Other));
-        }
-
-        [Test]
-        public void MethodGetDataWillFilterOutLinesWithoutData()
-        {
-            var text_lines = new List<string>()
-            {
-                "// This file is for...", 
-                "!File\tSize\tSomething",
-                "stuff.txt\t11\t...", 
-                "stuff2.txt\t17\t... // my comment",
-                "//stuff3.txt\t11\t..."
-            };
-
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            var data = data_file.GetDataTable();
-
-            Assert.That(data.Titles.Length, Is.EqualTo(3));
-            Assert.That(data.Titles[0], Is.EqualTo("File"));
-            Assert.That(data.Titles[1], Is.EqualTo("Size"));
-            Assert.That(data.Titles[2], Is.EqualTo("Something"));
-
-            // Verify data
-            Assert.That(data.Count, Is.EqualTo(2));
-            Assert.That(TeaboxDataLine.GetData(data[0]).Count, Is.EqualTo(3));
-            Assert.That(data[0][0], Is.EqualTo("stuff.txt"));
-            Assert.That(data[0][1], Is.EqualTo("11"));
-            Assert.That(data[0][2], Is.EqualTo("..."));
-            Assert.That(data[0]["File"], Is.EqualTo("stuff.txt"));
-            Assert.That(data[0]["Size"], Is.EqualTo("11"));
-            Assert.That(data[0]["Something"], Is.EqualTo("..."));
-
-            Assert.That(TeaboxDataLine.GetData(data[1]).Count, Is.EqualTo(3));
-            Assert.That(data[1][0], Is.EqualTo("stuff2.txt"));
-            Assert.That(data[1][1], Is.EqualTo("17"));
-            Assert.That(data[1][2], Is.EqualTo("..."));
-            Assert.That(data[1]["File"], Is.EqualTo("stuff2.txt"));
-            Assert.That(data[1]["Size"], Is.EqualTo("17"));
-            Assert.That(data[1]["Something"], Is.EqualTo("..."));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 4)).Count, Is.EqualTo(0));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 4)), Is.EqualTo("stuff3.txt\t11\t..."));
+            Assert.That(TeaboxDataLine.GetLineType(TeaboxDataFile.GetLine(data_file, 4)), Is.EqualTo(TeaboxDataLineType.Other));
         }
 
         [Test]
@@ -269,14 +231,14 @@ namespace TeaboxDataFormat.Tests.IO
             var data_file = TeaboxDataFile.Open(file.Object);
 
             Assert.That(data_file.Count(), Is.EqualTo(7));
-            Assert.That(TeaboxDataLine.GetData(data_file[0]).Count, Is.EqualTo(1));
-            Assert.That(TeaboxDataLine.GetData(data_file[0], 0), Is.EqualTo("#Kai"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1]).Count, Is.EqualTo(4));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 0), Is.EqualTo("1"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 1), Is.EqualTo("6113986"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 2), Is.EqualTo("x"));
-            Assert.That(TeaboxDataLine.GetData(data_file[1], 3), Is.EqualTo("1"));
-            Assert.That(TeaboxDataLine.GetComment(data_file[1]), Is.EqualTo("Kai Hood"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0)).Count, Is.EqualTo(1));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 0), 0), Is.EqualTo("#Kai"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1)).Count, Is.EqualTo(4));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 0), Is.EqualTo("1"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 1), Is.EqualTo("6113986"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 2), Is.EqualTo("x"));
+            Assert.That(TeaboxDataLine.GetData(TeaboxDataFile.GetLine(data_file, 1), 3), Is.EqualTo("1"));
+            Assert.That(TeaboxDataLine.GetComment(TeaboxDataFile.GetLine(data_file, 1)), Is.EqualTo("Kai Hood"));
         }
 
         [Test]
@@ -317,7 +279,7 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result[3], Is.EqualTo(text_lines[3]));
             Assert.That(result[4], Is.EqualTo(text_lines[4]));
         }
-        
+
         [Test]
         public void CanWriteToFileLinesMissingSomeTitles()
         {
@@ -526,7 +488,7 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void GetDataAsWorksWithStringProperties()
+        public void WhenOpenFileWithSpecifiedTypeTheStringPropertiesWillWork()
         {
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
@@ -538,11 +500,10 @@ namespace TeaboxDataFormat.Tests.IO
                 });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var result = data_file.GetDataLines();
 
-            Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result.Count(x => x.DateField1 == "Hello" && x.DateField2 == "World"), Is.EqualTo(1));
-            Assert.That(result.Count(x => x.DateField1 == "Something" && x.DateField2 == "Else"), Is.EqualTo(1));
+            Assert.That(data_file.Count, Is.EqualTo(2));
+            Assert.That(data_file.Count(x => x.DateField1 == "Hello" && x.DateField2 == "World"), Is.EqualTo(1));
+            Assert.That(data_file.Count(x => x.DateField1 == "Something" && x.DateField2 == "Else"), Is.EqualTo(1));
         }
 
         public class TestItemForGetDataAsWorksWithStringProperties : TeaboxDataLine
@@ -552,7 +513,7 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void GetDataAsWorksWithIntAndDateTimeProperties()
+        public void WhenOpenFileWithSpecifiedTypeTheIntAndDateTimePropertiesWillWork()
         {
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
@@ -564,11 +525,10 @@ namespace TeaboxDataFormat.Tests.IO
                 });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithIntAndDateTimeProperties>(file.Object);
-            var result = data_file.GetDataLines();
 
-            Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result.Count(x => x.MyRowID == 11 && x.MyEditDate == new DateTime(2017, 2, 11)), Is.EqualTo(1));
-            Assert.That(result.Count(x => x.MyRowID == 22 && x.MyEditDate == new DateTime(2017, 1, 12)), Is.EqualTo(1));
+            Assert.That(data_file.Count, Is.EqualTo(2));
+            Assert.That(data_file.Count(x => x.MyRowID == 11 && x.MyEditDate == new DateTime(2017, 2, 11)), Is.EqualTo(1));
+            Assert.That(data_file.Count(x => x.MyRowID == 22 && x.MyEditDate == new DateTime(2017, 1, 12)), Is.EqualTo(1));
         }
 
         public class TestItemForGetDataAsWorksWithIntAndDateTimeProperties : TeaboxDataLine
@@ -578,7 +538,7 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void GetDataAsWorksWithBoolProperties()
+        public void WhenOpenFileWithSpecifiedTypeTheBoolPropertiesWillWork()
         {
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
@@ -590,18 +550,46 @@ namespace TeaboxDataFormat.Tests.IO
                 });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithBoolProperties>(file.Object);
-            var result = data_file.GetDataLines();
 
-            Assert.That(result.Count, Is.EqualTo(3));
-            Assert.That(result.Count(x => x.Id == 1 && x.Works == false), Is.EqualTo(1));
-            Assert.That(result.Count(x => x.Id == 2 && x.Works == false), Is.EqualTo(1));
-            Assert.That(result.Count(x => x.Id == 3 && x.Works == true), Is.EqualTo(1));
+            Assert.That(data_file.Count, Is.EqualTo(3));
+            Assert.That(data_file.Count(x => x.Id == 1 && x.Works == false), Is.EqualTo(1));
+            Assert.That(data_file.Count(x => x.Id == 2 && x.Works == false), Is.EqualTo(1));
+            Assert.That(data_file.Count(x => x.Id == 3 && x.Works == true), Is.EqualTo(1));
         }
 
         public class TestItemForGetDataAsWorksWithBoolProperties : TeaboxDataLine
         {
             public int Id { get; set; }
             public bool Works { get; set; }
+        }
+
+        [Test]
+        public void CanUpdateAndSaveData()
+        {
+            var file = new Mock<IFileContainer>();
+            file.Setup(x => x.ReadAllLines()).Returns(new List<string>()
+                {
+                    "!DateField1\tDateField2",
+                    "Hello\tWorld",
+                    "// A bit of a comment",
+                    "Something\tElse",
+                });
+
+            IList<string> result = new List<string>();
+            file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
+
+            var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
+
+            data_file.First(x => x.DateField1 == "Hello").DateField2 = "Me";
+            data_file.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+
+            data_file.Save();
+
+            Assert.That(result.Count, Is.EqualTo(4));
+            Assert.That(result[0], Is.EqualTo("!DateField1\tDateField2"));
+            Assert.That(result[1], Is.EqualTo("Hello\tMe"));
+            Assert.That(result[2], Is.EqualTo("// A bit of a comment"));
+            Assert.That(result[3], Is.EqualTo("Something\tWicked"));
         }
 
         [Test]
@@ -620,12 +608,13 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataLines();
 
-            data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
-            data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+            var just_data = data_file.Where(x => true);
 
-            data_file.UpdateAndMergeData(data, "DateField1");
+            just_data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
+            just_data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+
+            data_file.UpdateAndMergeData(just_data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(4));
@@ -651,13 +640,13 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataLines();
+            var just_data = data_file.Where(x => true).ToList();
 
-            data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
-            data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
-            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
+            just_data.First(x => x.DateField1 == "Hello").DateField2 = "Me";
+            just_data.First(x => x.DateField1 == "Something").DateField2 = "Wicked";
+            just_data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.UpdateAndMergeData(data, "DateField1");
+            data_file.UpdateAndMergeData(just_data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(5));
@@ -669,7 +658,7 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void CanOpenFileBasedOnATeaboxDataLineChildObject()
+        public void CanOpenNewFileBasedOnATeaboxDataLineChildObjectAndAddItems()
         {
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>() {});
@@ -678,12 +667,10 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => { result = y; });
 
             var data_file = TeaboxDataFile.Open<TestItemForGetDataAsWorksWithStringProperties>(file.Object);
-            var data = data_file.GetDataLines();
 
-            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
-            data.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
+            data_file.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "Hello", DateField2 = "World" });
+            data_file.Add(new TestItemForGetDataAsWorksWithStringProperties() { DateField1 = "XX", DateField2 = "YY" });
 
-            data_file.UpdateAndMergeData(data, "DateField1");
             data_file.Save();
 
             Assert.That(result.Count, Is.EqualTo(3));
@@ -703,23 +690,26 @@ namespace TeaboxDataFormat.Tests.IO
             });
 
             var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
-            var result = stock_list_file.GetDataLines();
 
-            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(stock_list_file.Count, Is.EqualTo(2));
 
-            Assert.That(result[0].FullName, Is.EqualTo("Clas Ohlson AB"));
-            Assert.That(result[0].TickerSymbol, Is.EqualTo("CLAS-B"));
-            Assert.That(result[0].GooglePrefix, Is.EqualTo("STO"));
-            Assert.That(result[0].YahooSufix, Is.EqualTo("ST"));
-            Assert.That(result[0].LastDownloadAttempt, Is.EqualTo(new DateTime(2017, 4, 23, 7, 41, 0)));
-            Assert.That(result[0].SuccessfulDownload, Is.EqualTo(true));
+            var first_line = stock_list_file.First();
+            var second_line = stock_list_file.Skip(1).First();
 
-            Assert.That(result[1].FullName, Is.EqualTo("Scandi Standard"));
-            Assert.That(result[1].TickerSymbol, Is.EqualTo("SCST"));
-            Assert.That(result[1].GooglePrefix, Is.EqualTo("STO"));
-            Assert.That(result[1].YahooSufix, Is.EqualTo("ST"));
-            Assert.That(result[1].LastDownloadAttempt, Is.EqualTo(DateTime.MinValue));
-            Assert.That(result[1].SuccessfulDownload, Is.EqualTo(false));
+
+            Assert.That(first_line.FullName, Is.EqualTo("Clas Ohlson AB"));
+            Assert.That(first_line.TickerSymbol, Is.EqualTo("CLAS-B"));
+            Assert.That(first_line.GooglePrefix, Is.EqualTo("STO"));
+            Assert.That(first_line.YahooSufix, Is.EqualTo("ST"));
+            Assert.That(first_line.LastDownloadAttempt, Is.EqualTo(new DateTime(2017, 4, 23, 7, 41, 0)));
+            Assert.That(first_line.SuccessfulDownload, Is.EqualTo(true));
+
+            Assert.That(second_line.FullName, Is.EqualTo("Scandi Standard"));
+            Assert.That(second_line.TickerSymbol, Is.EqualTo("SCST"));
+            Assert.That(second_line.GooglePrefix, Is.EqualTo("STO"));
+            Assert.That(second_line.YahooSufix, Is.EqualTo("ST"));
+            Assert.That(second_line.LastDownloadAttempt, Is.EqualTo(DateTime.MinValue));
+            Assert.That(second_line.SuccessfulDownload, Is.EqualTo(false));
         }
 
         [Test]
@@ -733,23 +723,25 @@ namespace TeaboxDataFormat.Tests.IO
             });
 
             var stock_list_file = TeaboxDataFile.Open<TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile>(file_container.Object);
-            var result = stock_list_file.GetDataTable();
 
-            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(stock_list_file.Count, Is.EqualTo(2));
 
-            Assert.That(result[0]["FullName"], Is.EqualTo("Clas Ohlson AB"));
-            Assert.That(result[0]["TickerSymbol"], Is.EqualTo("CLAS-B"));
-            Assert.That(result[0]["GooglePrefix"], Is.EqualTo("STO"));
-            Assert.That(result[0]["YahooSufix"], Is.EqualTo("ST"));
-            Assert.That(result[0]["LastDownloadAttempt"], Is.EqualTo("2017-04-23 07:41"));
-            Assert.That(result[0]["SuccessfulDownload"], Is.EqualTo("TRUE"));
+            var first_line = stock_list_file.First();
+            var second_line = stock_list_file.Skip(1).First();
 
-            Assert.That(result[1]["FullName"], Is.EqualTo("Scandi Standard"));
-            Assert.That(result[1]["TickerSymbol"], Is.EqualTo("SCST"));
-            Assert.That(result[1]["GooglePrefix"], Is.EqualTo("STO"));
-            Assert.That(result[1]["YahooSufix"], Is.EqualTo("ST"));
-            Assert.That(result[1]["LastDownloadAttempt"], Is.EqualTo(""));
-            Assert.That(result[1]["SuccessfulDownload"], Is.EqualTo(""));
+            Assert.That(TeaboxDataLine.GetData(first_line, "FullName"), Is.EqualTo("Clas Ohlson AB"));
+            Assert.That(TeaboxDataLine.GetData(first_line, "TickerSymbol"), Is.EqualTo("CLAS-B"));
+            Assert.That(TeaboxDataLine.GetData(first_line, "GooglePrefix"), Is.EqualTo("STO"));
+            Assert.That(TeaboxDataLine.GetData(first_line, "YahooSufix"), Is.EqualTo("ST"));
+            Assert.That(TeaboxDataLine.GetData(first_line, "LastDownloadAttempt"), Is.EqualTo("2017-04-23 07:41"));
+            Assert.That(TeaboxDataLine.GetData(first_line, "SuccessfulDownload"), Is.EqualTo("TRUE"));
+
+            Assert.That(TeaboxDataLine.GetData(second_line, "FullName"), Is.EqualTo("Scandi Standard"));
+            Assert.That(TeaboxDataLine.GetData(second_line, "TickerSymbol"), Is.EqualTo("SCST"));
+            Assert.That(TeaboxDataLine.GetData(second_line, "GooglePrefix"), Is.EqualTo("STO"));
+            Assert.That(TeaboxDataLine.GetData(second_line, "YahooSufix"), Is.EqualTo("ST"));
+            Assert.That(TeaboxDataLine.GetData(second_line, "LastDownloadAttempt"), Is.EqualTo(""));
+            Assert.That(TeaboxDataLine.GetData(second_line, "SuccessfulDownload"), Is.EqualTo(""));
         }
 
         public class TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile : TeaboxDataLine
@@ -853,7 +845,7 @@ namespace TeaboxDataFormat.Tests.IO
             
             var tbfile = TeaboxDataFile.Open<TestItemForCanGetDataLinesAndModifyThem>(db_file.Object);
 
-            var line = tbfile.GetDataLines().Where(x => x.DbName == "MultiDB_Henrik").FirstOrDefault();
+            var line = tbfile.Where(x => x.DbName == "MultiDB_Henrik").FirstOrDefault();
 
 
             Assert.That(TeaboxDataLine.GetLineType(line), Is.EqualTo(TeaboxDataLineType.Data));
@@ -895,117 +887,7 @@ namespace TeaboxDataFormat.Tests.IO
             https://en.wikipedia.org/wiki/Byte_order_mark
             http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
         */
-
-        #region IList and ICollection tests
-        [Test]
-        public void CanGetAndSetLinesWithIndex()
-        {
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
-
-            var test_line_1 = new TeaboxDataLine();
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            data_file.Add(new TeaboxDataLine());
-            data_file.Add(test_line_1);
-            data_file.Add(new TeaboxDataLine());
-
-            Assert.That(data_file[1], Is.EqualTo(test_line_1));
-
-            var test_line_2 = new TeaboxDataLine();
-            data_file[1] = test_line_2;
-
-            Assert.That(data_file[1], Is.EqualTo(test_line_2));
-        }
-
-        [Test]
-        public void CanUseIndexOfMethod()
-        {
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
-
-            var test_line_1 = new TeaboxDataLine();
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            data_file.Add(new TeaboxDataLine());
-            data_file.Add(test_line_1);
-            data_file.Add(new TeaboxDataLine());
-
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
-        }
-
-        [Test]
-        public void CanUseInsertMethod()
-        {
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
-
-            var test_line_1 = new TeaboxDataLine();
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            data_file.Add(new TeaboxDataLine());
-            data_file.Add(new TeaboxDataLine());
-
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
-
-            data_file.Insert(1, test_line_1);
-
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
-        }
-
-        [Test]
-        public void InsertMethodWillSetTitlesOnNewLine()
-        {
-            var text_lines = new List<string>()
-            {
-                "// This file is for...",
-                "!File\tSize\tSomething",
-                "stuff.txt\t11\t...",
-                "stuff2.txt\t17\t...// my comment",
-                "//stuff3.txt\t11\t..."
-            };
-
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
-
-            var test_line_1 = new TeaboxDataLine();
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            data_file.Add(new TeaboxDataLine());
-            data_file.Add(new TeaboxDataLine());
-
-            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(0));
-
-            data_file.Insert(4, test_line_1);
-
-            Assert.That(TeaboxDataLine.GetTitles(test_line_1).Count, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void CanUseRemoveAtMethod()
-        {
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(new List<string>());
-
-            var test_line_1 = new TeaboxDataLine();
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            data_file.Add(new TeaboxDataLine());
-            data_file.Add(test_line_1);
-            data_file.Add(new TeaboxDataLine());
-
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
-
-            data_file.RemoveAt(1);
-
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
-        }
-
+       
         [Test]
         public void CanUseAddMethod()
         {
@@ -1016,11 +898,11 @@ namespace TeaboxDataFormat.Tests.IO
 
             var data_file = TeaboxDataFile.Open(file.Object);
 
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+            Assert.That(data_file.Contains(test_line_1), Is.False);
             data_file.Add(test_line_1);
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(0));
+            Assert.That(data_file.Contains(test_line_1), Is.True);
         }
-
+        
         [Test]
         public void AddMethodWillSetTitlesOnNewLine()
         {
@@ -1049,30 +931,6 @@ namespace TeaboxDataFormat.Tests.IO
         }
 
         [Test]
-        public void CanUseClearMethod()
-        {
-            var text_lines = new List<string>()
-            {
-                "// This file is for...",
-                "!File\tSize\tSomething",
-                "stuff.txt\t11\t...",
-                "stuff2.txt\t17\t...// my comment",
-                "//stuff3.txt\t11\t..."
-            };
-
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-            Assert.That(data_file.Count, Is.EqualTo(5));
-
-            data_file.Clear();
-
-            Assert.That(data_file.Count, Is.EqualTo(0));
-        }
-
-        [Test]
         public void CanUseContainsMethod()
         {
             var file = new Mock<IFileContainer>();
@@ -1091,32 +949,7 @@ namespace TeaboxDataFormat.Tests.IO
 
             Assert.That(data_file.Contains(test_line_1), Is.EqualTo(true));
         }
-
-        [Test]
-        public void CanUseCopyToMethod()
-        {
-            var text_lines = new List<string>()
-            {
-                "// This file is for...",
-                "!File\tSize\tSomething",
-                "stuff.txt\t11\t...",
-                "stuff2.txt\t17\t...// my comment",
-                "//stuff3.txt\t11\t..."
-            };
-
-            var file = new Mock<IFileContainer>();
-            file.Setup(x => x.ReadAllLines()).Returns(text_lines);
-
-            var data_file = TeaboxDataFile.Open(file.Object);
-
-
-            var lines = new TeaboxDataLine[5];
-
-            data_file.CopyTo(lines, 0);
-
-            Assert.That(TeaboxDataLine.GetData(lines[2],"File"), Is.EqualTo("stuff.txt"));
-        }
-
+        
         [Test]
         public void CanUseRemoveMethod()
         {
@@ -1131,13 +964,13 @@ namespace TeaboxDataFormat.Tests.IO
             data_file.Add(test_line_1);
             data_file.Add(new TeaboxDataLine());
 
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(1));
+            Assert.That(data_file.Contains(test_line_1), Is.True);
 
             data_file.Remove(test_line_1);
 
-            Assert.That(data_file.IndexOf(test_line_1), Is.EqualTo(-1));
+            Assert.That(data_file.Contains(test_line_1), Is.False);
         }
-
+        
         [Test]
         public void CanUseCountProperty()
         {
@@ -1156,8 +989,6 @@ namespace TeaboxDataFormat.Tests.IO
 
             Assert.That(data_file.Count, Is.EqualTo(2));
         }
-
-        #endregion
-        
+       
     }
 }
