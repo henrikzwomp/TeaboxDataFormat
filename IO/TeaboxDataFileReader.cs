@@ -21,18 +21,31 @@ namespace TeaboxDataFormat.IO
 
             if (!no_comments)
             {
-                // Starts with "//"
-                if (line.StartsWith(CommentIdentifier))
-                {
-                    comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
-                    return;
-                }
+                var comment_index = line.IndexOf(CommentIdentifier);
 
-                // Includes " //" or "\t//"
-                if (line.Contains(" " + CommentIdentifier) || line.Contains("\t" + CommentIdentifier))
+                if(comment_index > -1)
                 {
-                    comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
-                    line = line.Substring(0, line.IndexOf(CommentIdentifier));
+                    if (comment_index == 0) // Starts with "//"
+                    {
+                        comment = line.Substring(line.IndexOf(CommentIdentifier) + CommentIdentifier.Length);
+                        return;
+                    }
+
+                    while(comment_index > 0)
+                    {
+                        var pre_char = line.Substring(comment_index - 1, 1);
+                        if (pre_char == " " || pre_char == "\t")
+                        {
+                            comment = line.Substring(comment_index + CommentIdentifier.Length);
+                            line = line.Substring(0, comment_index);
+                            break;
+                        }
+
+                        if (line.Length <= comment_index + 2)
+                            break;
+
+                        comment_index = line.IndexOf(CommentIdentifier, comment_index+2);
+                    }
                 }
             }
 

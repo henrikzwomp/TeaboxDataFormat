@@ -245,7 +245,42 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
             Assert.That(data.Length, Is.EqualTo(1));
             Assert.That(data[0], Is.EqualTo("http://TheReasonForThisStrickness"));
+        }
 
+        [Test]
+        public void CanHandleUrlWithCommentOnEnd()
+        {
+            string comment;
+            TeaboxDataLineType type;
+            string[] data;
+
+            TestReader.PublicParseLine("https://www.avanza.se/aktier/om-aktien.html/98412/hms-networks // Stockholmsbörsen", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("https://www.avanza.se/aktier/om-aktien.html/98412/hms-networks"));
+            Assert.That(comment, Is.EqualTo(" Stockholmsbörsen"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+        }
+
+        [Test]
+        public void CanHandleMultipleCommentIdentifier()
+        {
+            string comment;
+            TeaboxDataLineType type;
+            string[] data;
+
+            TestReader.PublicParseLine("Data //Comment //Another Comment", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(1));
+            Assert.That(data[0], Is.EqualTo("Data"));
+            Assert.That(comment, Is.EqualTo("Comment //Another Comment"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Data));
+
+            TestReader.PublicParseLine("//Comment //Another Comment", out comment, out type, out data);
+
+            Assert.That(data.Length, Is.EqualTo(0));
+            Assert.That(comment, Is.EqualTo("Comment //Another Comment"));
+            Assert.That(type, Is.EqualTo(TeaboxDataLineType.Other));
         }
     }
 }
