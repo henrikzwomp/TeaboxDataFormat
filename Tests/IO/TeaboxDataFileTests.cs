@@ -547,9 +547,7 @@ namespace TeaboxDataFormat.Tests.IO
 
         public class TestItemForGetDataAsWorksWithStringProperties : TeaboxDataLine
         {
-            [TeaboxData]
             public string DateField1 { get; set; }
-            [TeaboxData]
             public string DateField2 { get; set; }
         }
 
@@ -575,9 +573,7 @@ namespace TeaboxDataFormat.Tests.IO
 
         public class TestItemForGetDataAsWorksWithIntAndDateTimeProperties : TeaboxDataLine
         {
-            [TeaboxData]
             public int MyRowID { get; set; }
-            [TeaboxData]
             public DateTime MyEditDate { get; set; }
         }
 
@@ -604,9 +600,7 @@ namespace TeaboxDataFormat.Tests.IO
 
         public class TestItemForGetDataAsWorksWithBoolProperties : TeaboxDataLine
         {
-            [TeaboxData]
             public int Id { get; set; }
-            [TeaboxData]
             public bool Works { get; set; }
         }
 
@@ -760,25 +754,16 @@ namespace TeaboxDataFormat.Tests.IO
 
         public class TestItemForBasedOnClassPropertyOrderWillNotChangeOrderInFile : TeaboxDataLine
         {
-            [TeaboxData]
             public string TickerSymbol { get; set; }
-            [TeaboxData]
             public string GooglePrefix { get; set; }
-            [TeaboxData]
             public string YahooSufix { get; set; }
-            [TeaboxData]
             public string FullName { get; set; }
-            [TeaboxData]
             public DateTime LastDownloadAttempt { get; set; }
-            [TeaboxData]
             public bool SuccessfulDownload { get; set; }
 
             // ToDo Move
-            [TeaboxData]
             public bool YahooDownloadFailed { get; set; }
-            [TeaboxData]
             public string YahooDownloadFile { get; set; }
-            [TeaboxData]
             public DateTime YahooDownloadDate { get; set; }
         }
 
@@ -814,17 +799,11 @@ namespace TeaboxDataFormat.Tests.IO
 
         private class TestItemForCanSaveWithNewCustomLineAdded : TeaboxDataLine
         {
-            [TeaboxData]
             public string Action { get; set; }
-            [TeaboxData]
             public string Note { get; set; }
-            [TeaboxData]
             public string DbName { get; set; }
-            [TeaboxData]
             public string Message { get; set; }
-            [TeaboxData]
             public DateTime DateTime { get; set; }
-            [TeaboxData]
             public int ThreadId { get; set; }
         }
 
@@ -894,31 +873,21 @@ namespace TeaboxDataFormat.Tests.IO
 
         private class TestItemForCanGetDataLinesAndModifyThem : TeaboxDataLine
         {
-            [TeaboxData]
             public string DbName { get; set; }
-            [TeaboxData]
             public string Backup_SuccessDate { get; set; }
-            [TeaboxData]
             public string Backup_Note { get; set; }
-            [TeaboxData]
             public string Backup_ActionDate { get; set; }
-            [TeaboxData]
             public string Copy_SuccessDate { get; set; }
-            [TeaboxData]
             public string Copy_Note { get; set; }
-            [TeaboxData]
             public string Copy_ActionDate { get; set; }
-            public string Restore_SuccessDate { get; set; }
-            [TeaboxData]
+            //public string Restore_SuccessDate { get; set; }
             public string Restore_Note { get; set; }
-            [TeaboxData]
             public string Restore_ActionDate { get; set; }
-            [TeaboxData]
             public string Server { get; set; }
         }
 
-        [Test]
-        public void CanSupportTeaboxDataNoCommentsAttribute()
+        /*[Test]
+        public void CanSupportTeaboxDataNoCommentsAttribute() // ToDo: We have remove this logic
         {
             var file_container = new Mock<IFileContainer>();
             file_container.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
@@ -940,12 +909,10 @@ namespace TeaboxDataFormat.Tests.IO
             Assert.That(result[3].TestField, Is.EqualTo("// Blipp"));
         }
 
-        [TeaboxDataNoComments]
         private class TestItemForCanSupportTeaboxDataNoCommentsAttribute : TeaboxDataLine
         {
-            [TeaboxData]
             public string TestField { get; set; }
-        }
+        }*/
 
 
         // 

@@ -102,12 +102,12 @@ namespace TeaboxDataFormat.IO
 
             foreach (var prop in typeof(based_on).GetProperties())
             {
-                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+                //var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
-                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
-                {
+                //if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                //{
                     titles.Add(prop.Name);
-                }
+                //}
             }
             return new TeaboxDataFile<based_on>(file_path, titles);
         }

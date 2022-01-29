@@ -180,11 +180,16 @@ namespace TeaboxDataFormat.IO
         {
             foreach (var prop in typeof(line_type).GetProperties())
             {
-                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+                //var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
 
-                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
-                {
-                    var value_object = prop.GetValue(line);
+                var atts = prop.GetCustomAttributes(typeof(TeaboxDataIgnoreAttribute), true);
+
+                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataIgnoreAttribute))
+                    continue;
+
+                //if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                //{
+                var value_object = prop.GetValue(line);
 
                     var value_string = "";
 
@@ -192,7 +197,7 @@ namespace TeaboxDataFormat.IO
                         value_string = value_object.ToString();
 
                     TeaboxDataLine.SetData(line, prop.Name, value_string);
-                }
+                //}
             }
         }
 
@@ -201,10 +206,13 @@ namespace TeaboxDataFormat.IO
         {
             foreach (var prop in typeof(line_type).GetProperties())
             {
-                var atts = prop.GetCustomAttributes(typeof(TeaboxDataAttribute), true);
+                var atts = prop.GetCustomAttributes(typeof(TeaboxDataIgnoreAttribute), true);
 
-                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
-                {
+                if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataIgnoreAttribute))
+                    continue;
+
+                //if (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataAttribute))
+                //{
                     if (prop.PropertyType == typeof(string))
                         prop.SetValue(line, TeaboxDataLine.GetData(line, prop.Name));
                     else if (prop.PropertyType == typeof(int))
@@ -239,7 +247,7 @@ namespace TeaboxDataFormat.IO
                     }
                     else
                         throw new Exception("Property type not supported.");
-                }
+                //}
             }
         }
         #endregion
