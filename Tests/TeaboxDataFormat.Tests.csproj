@@ -64,8 +64,6 @@
     <Compile Include="IO\TeaboxDataFileReaderTests.cs" />
     <Compile Include="IO\TeaboxDataFileTests.cs" />
     <Compile Include="IO\TeaboxDataLineTests.cs" />
-    <Compile Include="IO\TeaboxDataRowTests.cs" />
-    <Compile Include="IO\TeaboxDataTableTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

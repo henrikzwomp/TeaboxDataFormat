@@ -431,14 +431,20 @@ namespace TeaboxDataFormat.Tests.IO
             var file = new Mock<IFileContainer>();
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => result = y);
 
-            var lines = new List<TeaboxDataRow>()
+            var lines = new List<TeaboxDataLine>()
             {
-                new TeaboxDataRow() { [0] = "Hello", [1] = "World" },
-                new TeaboxDataRow() { [0] = "Some", [1] = "Thing" },
-                new TeaboxDataRow() { [0] = "Strange", [1] = "Way" }
+                new TeaboxDataLine(),
+                new TeaboxDataLine(),
+                new TeaboxDataLine(),
             };
+            TeaboxDataLine.SetData(lines[0], 0, "Hello");
+            TeaboxDataLine.SetData(lines[0], 1, "World");
+            TeaboxDataLine.SetData(lines[1], 0, "Some");
+            TeaboxDataLine.SetData(lines[1], 1, "Thing");
+            TeaboxDataLine.SetData(lines[2], 0, "Strange");
+            TeaboxDataLine.SetData(lines[2], 1, "Way");
 
-            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataRow>();
+            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataLine>();
             writer.Write(lines, file.Object);
 
             Assert.That(result.Count, Is.EqualTo(3));
@@ -456,14 +462,20 @@ namespace TeaboxDataFormat.Tests.IO
             file.Setup(x => x.ReadAllLines()).Returns(new List<string>() { "Hello\tWorld" });
             file.Setup(x => x.WriteAllLines(It.IsAny<IList<string>>())).Callback<IList<string>>(y => result = y);
 
-            var lines = new List<TeaboxDataRow>()
+            var lines = new List<TeaboxDataLine>()
             {
-                new TeaboxDataRow() { [0] = "Hello", [1] = "World" },
-                new TeaboxDataRow() { [0] = "Some", [1] = "Thing" },
-                new TeaboxDataRow() { [0] = "Strange", [1] = "Way" }
+                new TeaboxDataLine(),
+                new TeaboxDataLine(),
+                new TeaboxDataLine(),
             };
+            TeaboxDataLine.SetData(lines[0], 0, "Hello");
+            TeaboxDataLine.SetData(lines[0], 1, "World");
+            TeaboxDataLine.SetData(lines[1], 0, "Some");
+            TeaboxDataLine.SetData(lines[1], 1, "Thing");
+            TeaboxDataLine.SetData(lines[2], 0, "Strange");
+            TeaboxDataLine.SetData(lines[2], 1, "Way");
 
-            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataRow>();
+            var writer = new CanHandleNoTitlesWritingFile_GenericFileWriter<TeaboxDataLine>();
             writer.Read(file.Object);
             writer.Write(lines, file.Object);
 
