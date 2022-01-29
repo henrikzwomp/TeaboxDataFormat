@@ -886,37 +886,6 @@ namespace TeaboxDataFormat.Tests.IO
             public string Server { get; set; }
         }
 
-        /*[Test]
-        public void CanSupportTeaboxDataNoCommentsAttribute() // ToDo: We have remove this logic
-        {
-            var file_container = new Mock<IFileContainer>();
-            file_container.Setup(x => x.ReadAllLines()).Returns(new List<string>() {
-                "!TestField",
-                "http://www.link.com",
-                "https://www.link.com",
-                "something // else",
-                "// Blipp",
-            });
-
-            var stock_list_file = TeaboxDataFile.Open<TestItemForCanSupportTeaboxDataNoCommentsAttribute>(file_container.Object);
-    var result = stock_list_file.GetDataLines();
-
-    Assert.That(result.Count, Is.EqualTo(4));
-
-            Assert.That(result[0].TestField, Is.EqualTo("http://www.link.com"));
-            Assert.That(result[1].TestField, Is.EqualTo("https://www.link.com"));
-            Assert.That(result[2].TestField, Is.EqualTo("something // else"));
-            Assert.That(result[3].TestField, Is.EqualTo("// Blipp"));
-        }
-
-        private class TestItemForCanSupportTeaboxDataNoCommentsAttribute : TeaboxDataLine
-        {
-            public string TestField { get; set; }
-        }*/
-
-
-        // 
-
         // ToDo: White space not preserved test
         // Comment in title perserved
         // Can save new object with values in correct columns

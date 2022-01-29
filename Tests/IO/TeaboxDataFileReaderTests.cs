@@ -16,7 +16,7 @@ namespace TeaboxDataFormat.Tests.IO
             public static void PublicParseLine(string line, out string comment
                 , out TeaboxDataLineType type, out string[] data)
             {
-                ParseLine(line, false, out comment, out type, out data);
+                ParseLine(line, out comment, out type, out data);
             }
         }
 

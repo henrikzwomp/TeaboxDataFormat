@@ -112,18 +112,6 @@ namespace TeaboxDataFormat.IO
             return new TeaboxDataFile<based_on>(file_path, titles);
         }
 
-        /*[Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
-        public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, string file_path)
-        {
-            return data_table.ToTeaboxDataFile(file_path);
-        }*/
-
-        /*[Obsolete("Moved to TeaboxDataTable.ToTeaboxDataFile(...)")]
-        public static TeaboxDataFile DataTableToFile(TeaboxDataTable data_table, IFileContainer file)
-        {
-            return data_table.ToTeaboxDataFile(file);
-        }*/
-
         /// <summary>
         /// Get all lines with data as TeaboxDataTable object
         /// Data is referenced to back to TeaboxDataFile object.

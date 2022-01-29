@@ -26,10 +26,7 @@ namespace TeaboxDataFormat.IO
                 TeaboxDataLineType type;
                 string[] data;
 
-                //var atts = typeof(item_type).GetCustomAttributes(typeof(TeaboxDataNoComments), true); // ToDo Test
-
-                ParseLine(raw_line, false, out comment, out type, out data);
-                // (atts.Length == 1 && atts[0].GetType() == typeof(TeaboxDataNoComments))
+                ParseLine(raw_line, out comment, out type, out data);
 
                 if (type == TeaboxDataLineType.Titles && _titles.Length == 0)
                 {
