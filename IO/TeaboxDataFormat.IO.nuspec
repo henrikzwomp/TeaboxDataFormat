@@ -6,12 +6,15 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>http://unlicense.org/</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/henrikzwomp/TeaboxDataFormat</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>Experimental build</releaseNotes>
-    <copyright>Copyright 2017</copyright>
+    <copyright>Copyright 2023</copyright>
     <tags></tags>
   </metadata>
+  <files>
+    <file src="..\README.md" target="\" />
+  </files>
 </package>
